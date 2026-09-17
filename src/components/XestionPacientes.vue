@@ -5,7 +5,20 @@
       <div class="fila">
         <div class="campo campo-dni">
           <label>DNI/CIF:</label>
-          <input v-model="novoUsuario.dni" type="text" required style="text-align: center;" />
+          <div class="dni-control">
+            <input
+              v-model="novoUsuario.dni"
+              type="text"
+              required
+              autocomplete="off"
+              style="text-align: center;"
+              @input="dniComprobado = false"
+              @blur="normalizarDni"
+              :class="{ 'dni-invalido': dniInvalido, 'dni-correcto': dniComprobado && !dniInvalido }"
+              :aria-invalid="dniInvalido"
+            />
+            <small v-if="dniInvalido" class="mensaxe-dni">DNI inválido</small>
+          </div>
         </div>
         <div class="campo campo-nome">
           <label>Nome:</label>
@@ -17,9 +30,23 @@
         </div>
       </div>
       <div class="fila">
+        <div class="campo fecha-nacimiento">
+          <label>Fecha de nacemento:</label>
+          <input v-model="novoUsuario.fechaNacimiento" type="date" required />
+        </div>
         <div class="campo campo-correo">
           <label>Correo:</label>
           <input v-model="novoUsuario.correo" type="email" required />
+        </div>
+        <div class="campo movil">
+          <label>Móbil:</label>
+          <input v-model="novoUsuario.movil" type="tel" required />
+        </div>
+      </div>
+      <div class="fila">
+        <div class="campo direccion">
+          <label>Dirección:</label>
+          <input v-model="novoUsuario.direccion" type="text" required />
         </div>
         <div class="campo campo-provincia">
           <label>Provincia:</label>
@@ -54,7 +81,7 @@
           </div>
         </div>
       </div>
-      <button type="submit" class="btn-guardar" :disabled="novoUsuario.dni === '' || novoUsuario.nome === ''">
+      <button type="submit" class="btn-guardar" :disabled="novoUsuario.dni === '' || novoUsuario.nome === '' || dniInvalido">
         Gardar
       </button>
     </form>
@@ -95,9 +122,10 @@
 
 <script setup>
 /// Zona de declaracións
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 
 const usuarios = ref([])  //almacena la lista de usuarios e os seus cambios
+const dniComprobado = ref(false)
 
 const novoUsuario = reactive({
   dni: "",
@@ -106,6 +134,21 @@ const novoUsuario = reactive({
   provincia: "",
   activo: false,
   tipoCuenta: ""
+})
+
+const dniInvalido = computed(() => {
+  const dni = novoUsuario.dni.toUpperCase()
+
+  if (dni.length === 0) {
+    return false
+  }
+
+  if (!/^\d{8}[A-Z]$/.test(dni)) {
+    return true
+  }
+
+  const letras = 'TRWAGMYFPDXBNJZSQVHLCKE'
+  return letras[Number(dni.slice(0, 8)) % 23] !== dni.at(-1)
 })
 
 /// Zona de ciclo de vida
@@ -121,9 +164,19 @@ onMounted(() => {       //sempre se cargan estos usuarios de exemplo ao iniciar 
 
 /// Zona de métodos ou funcións
 
+function normalizarDni() {
+  novoUsuario.dni = novoUsuario.dni.trim().toUpperCase()
+  dniComprobado.value = novoUsuario.dni !== ''
+}
+
 function gardarUsuario() {
+  if (dniInvalido.value) {
+    return
+  }
+
   usuarios.value.push({ ...novoUsuario })  //engade o novo usuario á lista (copia do obxecto)
   Object.assign(novoUsuario, { dni: "", nome: "", correo: "", provincia: "", activo: false, tipoCuenta: "" }) //reinicia o formulario
+  dniComprobado.value = false
 }
 
 function eliminarUsuario(index) {
@@ -133,6 +186,7 @@ function eliminarUsuario(index) {
 function editarUsuario(index) {
   const usuario = usuarios.value[index];   //carga os datos do usuario elixido no formulario
   Object.assign(novoUsuario, usuario);  // carga os datos do usuario no formulario recorda v-model do formulario é novoUsuario
+  dniComprobado.value = false
 }
 
 </script>
@@ -159,8 +213,10 @@ form {
 
 .fila {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   width: 100%;
+  min-width: 0;
 }
 
 .fila-centrada {
@@ -173,24 +229,72 @@ form {
   /* label e input en la misma línea */
   gap: 0.5rem;
   border-radius: 0px;
+  min-width: 0;
+  flex: 1 1 0;
 }
 
 .campo-dni {
-  flex: 1;
-  /* ocupa menos espacio */
+  flex: 0 1 250px;
+  min-width: 250px;
   border-radius: 0px;
+}
+
+.dni-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.dni-control input {
+  flex: 0 0 100px;
+  width: 100px;
+  min-width: 100px;
+}
+
+.dni-control input.dni-invalido {
+  border-color: #e58b8b;
+  background-color: #fff;
+  color: #000;
+  -webkit-text-fill-color: #000;
+  box-shadow: 0 0 0 2px rgba(229, 139, 139, 0.15);
+}
+
+.dni-control input.dni-correcto {
+  border-color: #00bb74;
+  box-shadow: 0 0 0 2px rgba(0, 187, 116, 0.15);
+}
+
+.mensaxe-dni {
+  display: block;
+  flex: 0 0 auto;
+  color: #b42323;
+  font-size: 0.55rem;
+  white-space: nowrap;
 }
 
 .campo-nome {
-  flex: 3;
-  /* ocupa más espacio */
+  flex: 1.5 1 0;
   border-radius: 0px;
 }
 
+.campo-apelidos {
+  flex: 2.5 1 0;
+}
+
+.fecha-nacimiento {
+  flex: 1.6 1 0;
+  min-width: 230px;
+}
+
 .campo-correo {
-  flex: 2;
-  /* ocupa más espacio */
+  flex: 1.4 1 0;
   border-radius: 0px;
+}
+
+.movil {
+  flex: 2 1 0;
 }
 
 .campo select {
@@ -208,10 +312,9 @@ form {
 }
 
 .campo label {
-  min-width: 80px;
-  /* ancho fijo para alinear */
+  min-width: 70px;
   font-weight: 500;
-  font: bold
+  font-size: 0.85rem;
 }
 
 .campo input {
@@ -221,22 +324,41 @@ form {
   border: 1px solid #ddd;
   border-radius: 0px;
   box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 0.85rem;
+  background-color: #fff;
+  color: #000;
+  -webkit-text-fill-color: #000;
+}
+
+.campo select {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: 0.85rem;
+  background-color: #fff;
+}
+
+.fecha-nacimiento input {
+  min-width: 145px;
 }
 
 .btn-guardar {
-  background-color: #007bff;
-  color: white;
-  border: none;
+  background-color: #fff;
+  color: #00bb74;
+  border: 2px solid #00bb74;
   padding: 0.4rem 1.5rem;
-  border-radius: 0px;
+  border-radius: 8px;
   cursor: pointer;
   margin: 0 auto;
   display: block;
 }
 
 .btn-guardar:hover {
-  background-color: #0056b3;
-  border-radius: 0px;
+  background-color: #00bb74;
+  color: #fff;
+  border-radius: 8px;
 }
 
 .button {
@@ -250,7 +372,25 @@ form {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding-right: 5rem;
+  padding-right: 0;
+  font-size: 0.85rem;
+}
+
+.radios {
+  flex-wrap: nowrap;
+  gap: 0.9rem;
+}
+
+.radios label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.radios input {
+  flex: 0 0 auto;
 }
 
 table {
@@ -276,7 +416,7 @@ th {
 h4 {
   margin-bottom: 1rem;
   font-weight: 600;
-  background-color: #73aff0;
+  background-color: #58e4ae;
   color: white;
 }
 
@@ -291,6 +431,16 @@ h4 {
     /* apila los campos verticalmente en móviles */
     gap: 0.5rem;
     /* opcional: un pequeño espacio entre ellos */
+  }
+
+  .campo-dni {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .dni-control {
+    flex-wrap: wrap;
   }
 }
 </style>
