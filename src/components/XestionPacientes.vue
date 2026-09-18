@@ -22,11 +22,11 @@
         </div>
         <div class="campo campo-nome">
           <label>Nome:</label>
-          <input v-model="novoUsuario.nome" type="text" required />
+          <input v-model="novoUsuario.nome" type="text" required @blur="normalizarNome('nome')" />
         </div>
         <div class="campo campo-apelidos">
           <label>Apelidos:</label>
-          <input v-model="novoUsuario.apelidos" type="text" required />
+          <input v-model="novoUsuario.apelidos" type="text" required @blur="normalizarNome('apelidos')" />
         </div>
       </div>
       <div class="fila">
@@ -36,13 +36,31 @@
         </div>
         <div class="campo campo-correo">
           <label>Correo:</label>
-          <input v-model="novoUsuario.correo" type="email" required />
+          <input
+            v-model="novoUsuario.correo"
+            type="email"
+            required
+            @input="correoComprobado = false"
+            @blur="comprobarCorreo"
+            :class="{ 'correo-invalido': correoComprobado && correoInvalido }"
+            :aria-invalid="correoComprobado && correoInvalido"
+          />
         </div>
         <div class="campo movil">
           <label>Móbil:</label>
-          <input v-model="novoUsuario.movil" type="tel" required />
+          <input
+            v-model="novoUsuario.movil"
+            type="tel"
+            required
+            pattern="[67][0-9]{8}"
+            @input="mobilComprobado = false"
+            @blur="comprobarMobil"
+            :class="{ 'mobil-invalido': mobilComprobado && mobilInvalido }"
+            :aria-invalid="mobilComprobado && mobilInvalido"
+          />
         </div>
       </div>
+      
       <div class="fila">
         <div class="campo direccion">
           <label>Dirección:</label>
@@ -50,12 +68,21 @@
         </div>
         <div class="campo campo-provincia">
           <label>Provincia:</label>
-          <select v-model="novoUsuario.provincia">
+          <select v-model="novoUsuario.provincia" @change="novoUsuario.municipio = ''">
             <option value="">-- Escolle unha provincia --</option>
             <option>A Coruña</option>
             <option>Lugo</option>
             <option>Ourense</option>
             <option>Pontevedra</option>
+          </select>
+        </div>
+        <div class="campo campo-municipio">
+          <label>Municipio:</label>
+          <select v-model="novoUsuario.municipio">
+            <option value="">-- Escolle un municipio --</option>
+            <option v-for="municipio in municipiosVisibles" :key="municipio" :value="municipio">
+              {{ municipio }}
+            </option>
           </select>
         </div>
       </div>
@@ -81,7 +108,7 @@
           </div>
         </div>
       </div>
-      <button type="submit" class="btn-guardar" :disabled="novoUsuario.dni === '' || novoUsuario.nome === '' || dniInvalido">
+      <button type="submit" class="btn-guardar" :disabled="novoUsuario.dni === '' || novoUsuario.nome === '' || dniInvalido || mobilInvalido || correoInvalido">
         Gardar
       </button>
     </form>
@@ -126,12 +153,31 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 const usuarios = ref([])  //almacena la lista de usuarios e os seus cambios
 const dniComprobado = ref(false)
+const mobilComprobado = ref(false)
+const correoComprobado = ref(false)
+
+const municipiosPorProvincia = {
+  'A Coruña': [
+    'A Baña', 'A Capela', 'A Coruña', 'A Laracha', 'A Pobra do Caramiñal', 'A Pobra do Caramiñal', 'Ames', 'Aranga', 'Ares', 'Arteixo', 'Arzúa', 'As Pontes de García Rodríguez', 'Bergondo', 'Betanzos', 'Boimorto', 'Boiro', 'Boqueixón', 'Brión', 'Cabana de Bergantiños', 'Cabanas', 'Camariñas', 'Cambre', 'Carballo', 'Cariño', 'Cedeira', 'Cee', 'Cerceda', 'Cerdido', 'Coirós', 'Corcubión', 'Coristanco', 'Culleredo', 'Curtis', 'Dodro', 'Dumbría', 'Fene', 'Ferrol', 'Fisterra', 'Frades', 'Irixoa', 'Laxe', 'Lousame', 'Malpica de Bergantiños', 'Mañón', 'Mazaricos', 'Melide', 'Mesía', 'Miño', 'Moeche', 'Monfero', 'Mugardos', 'Muros', 'Muxía', 'Narón', 'Neda', 'Negreira', 'Noia', 'Oleiros', 'Ordes', 'Oroso', 'Ortigueira', 'Outes', 'Oza-Cesuras', 'Paderne', 'Padrón', 'Ponteceso', 'Pontedeume', 'Porto do Son', 'Rianxo', 'Ribeira', 'Rois', 'Sada', 'San Sadurniño', 'Santa Comba', 'Santiago de Compostela', 'Santiso', 'Sobrado', 'Somozas', 'Teo', 'Toques', 'Tordoia', 'Touro', 'Trazo', 'Val do Dubra', 'Valdoviño', 'Vedra', 'Vimianzo', 'Vilarmaior', 'Vilasantar', 'Zas'
+  ],
+  Lugo: [
+    'Abadín', 'Alfoz', 'Antas de Ulla', 'A Pastoriza', 'A Pobra do Brollón', 'As Nogais', 'Baleira', 'Baralla', 'Barreiros', 'Becerreá', 'Begonte', 'Bóveda', 'Burela', 'Carballedo', 'Castro de Rei', 'Castroverde', 'Cervantes', 'Cervo', 'Chantada', 'Cospeito', 'Folgoso do Courel', 'Fonsagrada', 'Foz', 'Friol', 'Guitiriz', 'Guntín', 'Incio', 'Láncara', 'Lourenzá', 'Lugo', 'Meira', 'Mondoñedo', 'Monforte de Lemos', 'Monterroso', 'Muras', 'Navia de Suarna', 'Negueira de Muñiz', 'O Corgo', 'O Incio', 'O Páramo', 'O Saviñao', 'O Valadouro', 'O Vicedo', 'Ourol', 'Outeiro de Rei', 'Palas de Rei', 'Pantón', 'Paradela', 'Pedrafita do Cebreiro', 'Pol', 'Portomarín', 'Quiroga', 'Rábade', 'Ribadeo', 'Ribas de Sil', 'Ribeira de Piquín', 'Riotorto', 'Samos', 'Sarria', 'Sober', 'Taboada', 'Trabada', 'Triacastela', 'Valadouro', 'Viveiro', 'Xermade', 'Xove'
+  ],
+  Ourense: [
+    'Allariz', 'A Arnoia', 'Avión', 'Baltar', 'Bande', 'Baños de Molgas', 'Barbadás', 'Barco de Valdeorras', 'Beade', 'Beariz', 'Boborás', 'Bola', 'Bolo', 'Calvos de Randín', 'Carballeda', 'Carballeda de Avia', 'Carballiño', 'Cartelle', 'Castrelo de Miño', 'Castrelo do Val', 'Castro Caldelas', 'Celanova', 'Cenlle', 'Chandrexa de Queixa', 'Coles', 'Cortegada', 'Cualedro', 'Entrimo', 'Esgos', 'Gomesende', 'Gudiña', 'Irixo', 'Larouco', 'Laza', 'Leiro', 'Lobeira', 'Lobios', 'Maceda', 'Manzaneda', 'Maside', 'Melón', 'Merca', 'Mezquita', 'Montederramo', 'Monterrei', 'Muíños', 'Nogueira de Ramuín', 'O Barco de Valdeorras', 'O Bolo', 'O Carballiño', 'O Irixo', 'O Pereiro de Aguiar', 'Oímbra', 'Ourense', 'Paderne de Allariz', 'Padrenda', 'Parada de Sil', 'Pereiro de Aguiar', 'Peroxa', 'Petín', 'Piñor', 'Pontedeva', 'Porqueira', 'Punxín', 'Quintela de Leirado', 'Rairiz de Veiga', 'Ramirás', 'Ribadavia', 'Riós', 'Rúa', 'Rubiá', 'San Amaro', 'San Cibrao das Viñas', 'San Cristovo de Cea', 'San Xoán de Río', 'Sandiás', 'Sarreaus', 'Taboadela', 'Teixeira', 'Toén', 'Trasmiras', 'Veiga', 'Verea', 'Verín', 'Viana do Bolo', 'Vilamarín', 'Vilamartín de Valdeorras', 'Vilar de Barrio', 'Vilar de Santos', 'Vilardevós', 'Vilariño de Conso', 'Xinzo de Limia', 'Xunqueira de Ambía', 'Xunqueira de Espadanedo'
+  ],
+  Pontevedra: [
+    'A Cañiza', 'A Estrada', 'A Guarda', 'A Illa de Arousa', 'A Lama', 'Arbo', 'Baiona', 'Barro', 'Bueu', 'Caldas de Reis', 'Cambados', 'Campo Lameiro', 'Cangas', 'Catoira', 'Cerdedo-Cotobade', 'Covelo', 'Crecente', 'Cuntis', 'Dozón', 'Forcarei', 'Fornelos de Montes', 'Gondomar', 'Marín', 'Meaño', 'Meis', 'Moaña', 'Mondariz', 'Mondariz-Balneario', 'Moraña', 'Mos', 'As Neves', 'Nigrán', 'O Grove', 'Oia', 'Pazos de Borbén', 'Poio', 'Ponte Caldelas', 'Ponteareas', 'Pontecesures', 'Pontevedra', 'Porriño', 'Portas', 'Redondela', 'Ribadumia', 'Rodeiro', 'Salceda de Caselas', 'Salvaterra de Miño', 'Sanxenxo', 'Silleda', 'Soutomaior', 'Tomiño', 'Tui', 'Valga', 'Vigo', 'Vilaboa', 'Vila de Cruces', 'Vilagarcía de Arousa', 'Vilanova de Arousa'
+  ]
+}
 
 const novoUsuario = reactive({
   dni: "",
   nome: "",
+  apelidos: "",
   correo: "",
   provincia: "",
+  municipio: "",
   activo: false,
   tipoCuenta: ""
 })
@@ -149,6 +195,25 @@ const dniInvalido = computed(() => {
 
   const letras = 'TRWAGMYFPDXBNJZSQVHLCKE'
   return letras[Number(dni.slice(0, 8)) % 23] !== dni.at(-1)
+})
+
+const mobilInvalido = computed(() => {
+  return novoUsuario.movil !== '' && !/^[67]\d{8}$/.test(novoUsuario.movil)
+})
+
+const correoInvalido = computed(() => {
+  return novoUsuario.correo !== '' && !/^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+)*@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i.test(novoUsuario.correo)
+})
+
+const municipiosVisibles = computed(() => {
+  const municipios = novoUsuario.provincia
+    ? municipiosPorProvincia[novoUsuario.provincia] || []
+    : Object.values(municipiosPorProvincia).flat()
+  const texto = novoUsuario.municipio.trim().toLocaleLowerCase('gl')
+
+  return [...new Set(municipios)]
+    .filter(municipio => municipio.toLocaleLowerCase('gl').includes(texto))
+    .sort((a, b) => a.localeCompare(b, 'gl'))
 })
 
 /// Zona de ciclo de vida
@@ -169,14 +234,33 @@ function normalizarDni() {
   dniComprobado.value = novoUsuario.dni !== ''
 }
 
+function normalizarNome(campo) {
+  novoUsuario[campo] = novoUsuario[campo]
+    .trim()
+    .toLowerCase()
+    .replace(/(^|\s)\S/g, letra => letra.toUpperCase())
+}
+
+function comprobarMobil() {
+  novoUsuario.movil = novoUsuario.movil.trim()
+  mobilComprobado.value = true
+}
+
+function comprobarCorreo() {
+  novoUsuario.correo = novoUsuario.correo.trim()
+  correoComprobado.value = true
+}
+
 function gardarUsuario() {
   if (dniInvalido.value) {
     return
   }
 
   usuarios.value.push({ ...novoUsuario })  //engade o novo usuario á lista (copia do obxecto)
-  Object.assign(novoUsuario, { dni: "", nome: "", correo: "", provincia: "", activo: false, tipoCuenta: "" }) //reinicia o formulario
+  Object.assign(novoUsuario, { dni: "", nome: "", apelidos: "", correo: "", provincia: "", municipio: "", activo: false, tipoCuenta: "" }) //reinicia o formulario
   dniComprobado.value = false
+  mobilComprobado.value = false
+  correoComprobado.value = false
 }
 
 function eliminarUsuario(index) {
@@ -187,6 +271,8 @@ function editarUsuario(index) {
   const usuario = usuarios.value[index];   //carga os datos do usuario elixido no formulario
   Object.assign(novoUsuario, usuario);  // carga os datos do usuario no formulario recorda v-model do formulario é novoUsuario
   dniComprobado.value = false
+  mobilComprobado.value = false
+  correoComprobado.value = false
 }
 
 </script>
@@ -293,8 +379,28 @@ form {
   border-radius: 0px;
 }
 
+.campo-correo input.correo-invalido {
+  border-color: #e58b8b;
+  background-color: #fff;
+  color: #000;
+  -webkit-text-fill-color: #000;
+  box-shadow: 0 0 0 2px rgba(229, 139, 139, 0.15);
+}
+
 .movil {
   flex: 2 1 0;
+}
+
+.movil input {
+  text-align: center;
+}
+
+.movil input.mobil-invalido {
+  border-color: #e58b8b;
+  background-color: #fff;
+  color: #000;
+  -webkit-text-fill-color: #000;
+  box-shadow: 0 0 0 2px rgba(229, 139, 139, 0.15);
 }
 
 .campo select {
@@ -309,6 +415,16 @@ form {
   flex: 1;
   /* ocupa menos espacio */
   border-radius: 0px;
+}
+
+.campo-provincia select,
+.campo-provincia option {
+  color: #000;
+}
+
+.campo-municipio select,
+.campo-municipio option {
+  color: #000;
 }
 
 .campo label {
