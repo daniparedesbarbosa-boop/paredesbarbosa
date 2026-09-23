@@ -3,6 +3,7 @@ import fs from "fs";
 import cors from "cors";
 
 //Crear la aplicacion express
+const PORT = 3000;
 const app = express();
 app.use(cors());
 
@@ -22,5 +23,5 @@ app.get('/api/municipios', (req, res) => {
 
 // Iniciar el servidor en el puerto 3000
 app.listen(3000, () => {
-  console.log("Servidor funcionando en http://localhost:3000");
+  console.log("Servidor funcionando en http://localhost:${PORT}");
 });

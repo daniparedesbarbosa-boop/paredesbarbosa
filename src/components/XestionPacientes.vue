@@ -84,25 +84,24 @@
           <label>Provincia:</label>
           <select
             v-model="novoUsuario.provincia"
-            @change="novoUsuario.municipio = ''"
+            @change="cargarMunicipios"
           >
-            <option value="">-- Escolle unha provincia --</option>
-            <option>A Coruña</option>
-            <option>Lugo</option>
-            <option>Ourense</option>
-            <option>Pontevedra</option>
+          <option value="">-- Escolle unha provincia --</option>
+            <option v-for="provincia in provincias" :key="provincia.id" :value="provincia.id">
+              {{ provincia.nm }}
+            </option>
           </select>
         </div>
         <div class="campo campo-municipio">
           <label>Municipio:</label>
-          <select v-model="novoUsuario.municipio">
+          <select id="municipio" v-model="novoUsuario.municipio">
             <option value="">-- Escolle un municipio --</option>
             <option
-              v-for="municipio in municipiosVisibles"
-              :key="municipio"
-              :value="municipio"
+              v-for="municipio in municipios"
+              :key="municipio.id"
+              :value="municipio.id"
             >
-              {{ municipio }}
+              {{ municipio.nm }}
             </option>
           </select>
         </div>
@@ -189,331 +188,13 @@
 <script setup>
 /// Zona de declaracións
 import { ref, reactive, computed, onMounted } from "vue";
+import { obtenerMunicipios,obtenerProvincias } from "../api/municipios.js";
 
 const pacientes = ref([]); //almacena la lista de pacientes e os seus cambios
 const dniComprobado = ref(false);
 const mobilComprobado = ref(false);
 const correoComprobado = ref(false);
-
-const municipiosPorProvincia = reactive({
-  "A Coruña": [
-    "A Baña",
-    "A Capela",
-    "A Coruña",
-    "A Laracha",
-    "A Pobra do Caramiñal",
-    "A Pobra do Caramiñal",
-    "Ames",
-    "Aranga",
-    "Ares",
-    "Arteixo",
-    "Arzúa",
-    "As Pontes de García Rodríguez",
-    "Bergondo",
-    "Betanzos",
-    "Boimorto",
-    "Boiro",
-    "Boqueixón",
-    "Brión",
-    "Cabana de Bergantiños",
-    "Cabanas",
-    "Camariñas",
-    "Cambre",
-    "Carballo",
-    "Cariño",
-    "Cedeira",
-    "Cee",
-    "Cerceda",
-    "Cerdido",
-    "Coirós",
-    "Corcubión",
-    "Coristanco",
-    "Culleredo",
-    "Curtis",
-    "Dodro",
-    "Dumbría",
-    "Fene",
-    "Ferrol",
-    "Fisterra",
-    "Frades",
-    "Irixoa",
-    "Laxe",
-    "Lousame",
-    "Malpica de Bergantiños",
-    "Mañón",
-    "Mazaricos",
-    "Melide",
-    "Mesía",
-    "Miño",
-    "Moeche",
-    "Monfero",
-    "Mugardos",
-    "Muros",
-    "Muxía",
-    "Narón",
-    "Neda",
-    "Negreira",
-    "Noia",
-    "Oleiros",
-    "Ordes",
-    "Oroso",
-    "Ortigueira",
-    "Outes",
-    "Oza-Cesuras",
-    "Paderne",
-    "Padrón",
-    "Ponteceso",
-    "Pontedeume",
-    "Porto do Son",
-    "Rianxo",
-    "Ribeira",
-    "Rois",
-    "Sada",
-    "San Sadurniño",
-    "Santa Comba",
-    "Santiago de Compostela",
-    "Santiso",
-    "Sobrado",
-    "Somozas",
-    "Teo",
-    "Toques",
-    "Tordoia",
-    "Touro",
-    "Trazo",
-    "Val do Dubra",
-    "Valdoviño",
-    "Vedra",
-    "Vimianzo",
-    "Vilarmaior",
-    "Vilasantar",
-    "Zas",
-  ],
-  Lugo: [
-    "Abadín",
-    "Alfoz",
-    "Antas de Ulla",
-    "A Pastoriza",
-    "A Pobra do Brollón",
-    "As Nogais",
-    "Baleira",
-    "Baralla",
-    "Barreiros",
-    "Becerreá",
-    "Begonte",
-    "Bóveda",
-    "Burela",
-    "Carballedo",
-    "Castro de Rei",
-    "Castroverde",
-    "Cervantes",
-    "Cervo",
-    "Chantada",
-    "Cospeito",
-    "Folgoso do Courel",
-    "Fonsagrada",
-    "Foz",
-    "Friol",
-    "Guitiriz",
-    "Guntín",
-    "Incio",
-    "Láncara",
-    "Lourenzá",
-    "Lugo",
-    "Meira",
-    "Mondoñedo",
-    "Monforte de Lemos",
-    "Monterroso",
-    "Muras",
-    "Navia de Suarna",
-    "Negueira de Muñiz",
-    "O Corgo",
-    "O Incio",
-    "O Páramo",
-    "O Saviñao",
-    "O Valadouro",
-    "O Vicedo",
-    "Ourol",
-    "Outeiro de Rei",
-    "Palas de Rei",
-    "Pantón",
-    "Paradela",
-    "Pedrafita do Cebreiro",
-    "Pol",
-    "Portomarín",
-    "Quiroga",
-    "Rábade",
-    "Ribadeo",
-    "Ribas de Sil",
-    "Ribeira de Piquín",
-    "Riotorto",
-    "Samos",
-    "Sarria",
-    "Sober",
-    "Taboada",
-    "Trabada",
-    "Triacastela",
-    "Valadouro",
-    "Viveiro",
-    "Xermade",
-    "Xove",
-  ],
-  Ourense: [
-    "Allariz",
-    "A Arnoia",
-    "Avión",
-    "Baltar",
-    "Bande",
-    "Baños de Molgas",
-    "Barbadás",
-    "Barco de Valdeorras",
-    "Beade",
-    "Beariz",
-    "Boborás",
-    "Bola",
-    "Bolo",
-    "Calvos de Randín",
-    "Carballeda",
-    "Carballeda de Avia",
-    "Carballiño",
-    "Cartelle",
-    "Castrelo de Miño",
-    "Castrelo do Val",
-    "Castro Caldelas",
-    "Celanova",
-    "Cenlle",
-    "Chandrexa de Queixa",
-    "Coles",
-    "Cortegada",
-    "Cualedro",
-    "Entrimo",
-    "Esgos",
-    "Gomesende",
-    "Gudiña",
-    "Irixo",
-    "Larouco",
-    "Laza",
-    "Leiro",
-    "Lobeira",
-    "Lobios",
-    "Maceda",
-    "Manzaneda",
-    "Maside",
-    "Melón",
-    "Merca",
-    "Mezquita",
-    "Montederramo",
-    "Monterrei",
-    "Muíños",
-    "Nogueira de Ramuín",
-    "O Barco de Valdeorras",
-    "O Bolo",
-    "O Carballiño",
-    "O Irixo",
-    "O Pereiro de Aguiar",
-    "Oímbra",
-    "Ourense",
-    "Paderne de Allariz",
-    "Padrenda",
-    "Parada de Sil",
-    "Pereiro de Aguiar",
-    "Peroxa",
-    "Petín",
-    "Piñor",
-    "Pontedeva",
-    "Porqueira",
-    "Punxín",
-    "Quintela de Leirado",
-    "Rairiz de Veiga",
-    "Ramirás",
-    "Ribadavia",
-    "Riós",
-    "Rúa",
-    "Rubiá",
-    "San Amaro",
-    "San Cibrao das Viñas",
-    "San Cristovo de Cea",
-    "San Xoán de Río",
-    "Sandiás",
-    "Sarreaus",
-    "Taboadela",
-    "Teixeira",
-    "Toén",
-    "Trasmiras",
-    "Veiga",
-    "Verea",
-    "Verín",
-    "Viana do Bolo",
-    "Vilamarín",
-    "Vilamartín de Valdeorras",
-    "Vilar de Barrio",
-    "Vilar de Santos",
-    "Vilardevós",
-    "Vilariño de Conso",
-    "Xinzo de Limia",
-    "Xunqueira de Ambía",
-    "Xunqueira de Espadanedo",
-  ],
-  Pontevedra: [
-    "A Cañiza",
-    "A Estrada",
-    "A Guarda",
-    "A Illa de Arousa",
-    "A Lama",
-    "Arbo",
-    "Baiona",
-    "Barro",
-    "Bueu",
-    "Caldas de Reis",
-    "Cambados",
-    "Campo Lameiro",
-    "Cangas",
-    "Catoira",
-    "Cerdedo-Cotobade",
-    "Covelo",
-    "Crecente",
-    "Cuntis",
-    "Dozón",
-    "Forcarei",
-    "Fornelos de Montes",
-    "Gondomar",
-    "Marín",
-    "Meaño",
-    "Meis",
-    "Moaña",
-    "Mondariz",
-    "Mondariz-Balneario",
-    "Moraña",
-    "Mos",
-    "As Neves",
-    "Nigrán",
-    "O Grove",
-    "Oia",
-    "Pazos de Borbén",
-    "Poio",
-    "Ponte Caldelas",
-    "Ponteareas",
-    "Pontecesures",
-    "Pontevedra",
-    "Porriño",
-    "Portas",
-    "Redondela",
-    "Ribadumia",
-    "Rodeiro",
-    "Salceda de Caselas",
-    "Salvaterra de Miño",
-    "Sanxenxo",
-    "Silleda",
-    "Soutomaior",
-    "Tomiño",
-    "Tui",
-    "Valga",
-    "Vigo",
-    "Vilaboa",
-    "Vila de Cruces",
-    "Vilagarcía de Arousa",
-    "Vilanova de Arousa",
-  ],
-});
+const municipios = ref([]);
 
 const novoUsuario = reactive({
   dni: "",
@@ -554,51 +235,9 @@ const correoInvalido = computed(() => {
   );
 });
 
-const municipiosVisibles = computed(() => {
-  const municipios = novoUsuario.provincia
-    ? municipiosPorProvincia[novoUsuario.provincia] || []
-    : Object.values(municipiosPorProvincia).flat();
-  const texto = novoUsuario.municipio.trim().toLocaleLowerCase("gl");
-
-  return [...new Set(municipios)]
-    .filter((municipio) => municipio.toLocaleLowerCase("gl").includes(texto))
-    .sort((a, b) => a.localeCompare(b, "gl"));
-});
-
 /// Zona de ciclo de vida
-
+const provincias = ref([]);
 onMounted(async () => {
-  try {
-    const respuesta = await fetch("http://localhost:3000/api/municipios");
-    if (!respuesta.ok) {
-      throw new Error("No se pudieron cargar los municipios");
-    }
-
-    const datos = await respuesta.json();
-    const nombresProvincias = Object.fromEntries(
-      datos.provincias.map((provincia) => [provincia.id, provincia.nm]),
-    );
-    const municipiosCargados = {};
-
-    datos.municipios.forEach((municipio) => {
-      const nombreProvincia = nombresProvincias[municipio.id.slice(0, 2)];
-      if (!nombreProvincia) {
-        return;
-      }
-
-      if (!municipiosCargados[nombreProvincia]) {
-        municipiosCargados[nombreProvincia] = [];
-      }
-      municipiosCargados[nombreProvincia].push(municipio.nm);
-    });
-
-    Object.keys(municipiosPorProvincia).forEach((provincia) => {
-      delete municipiosPorProvincia[provincia];
-    });
-    Object.assign(municipiosPorProvincia, municipiosCargados);
-  } catch (error) {
-    console.error("Error al cargar los municipios:", error);
-  }
 
   //sempre se cargan estos pacientes de exemplo ao iniciar o componente
   pacientes.value = [
@@ -635,9 +274,21 @@ onMounted(async () => {
       tipoCuenta: "empresa",
     },
   ];
+
+  provincias.value = await obtenerProvincias();
+
 });
 
 /// Zona de métodos ou funcións
+
+async function cargarMunicipios() {
+  if (novoUsuario.provincia === "") {
+    municipios.value = [];
+    return;
+  }
+
+  municipios.value = await obtenerMunicipios(novoUsuario.provincia);
+}
 
 function normalizarDni() {
   novoUsuario.dni = novoUsuario.dni.trim().toUpperCase();
