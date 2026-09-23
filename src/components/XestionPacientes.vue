@@ -1,6 +1,6 @@
 <template>
-  <div class="xestion-usuarios">
-    <h4>👥 Xestión de usuarios</h4>
+  <div class="xestion-pacientes">
+    <h4>👥 Xestión de pacientes</h4>
     <form @submit.prevent="gardarUsuario">
       <div class="fila">
         <div class="campo campo-dni">
@@ -11,10 +11,13 @@
               type="text"
               required
               autocomplete="off"
-              style="text-align: center;"
+              style="text-align: center"
               @input="dniComprobado = false"
               @blur="normalizarDni"
-              :class="{ 'dni-invalido': dniInvalido, 'dni-correcto': dniComprobado && !dniInvalido }"
+              :class="{
+                'dni-invalido': dniInvalido,
+                'dni-correcto': dniComprobado && !dniInvalido,
+              }"
               :aria-invalid="dniInvalido"
             />
             <small v-if="dniInvalido" class="mensaxe-dni">DNI inválido</small>
@@ -22,11 +25,21 @@
         </div>
         <div class="campo campo-nome">
           <label>Nome:</label>
-          <input v-model="novoUsuario.nome" type="text" required @blur="normalizarNome('nome')" />
+          <input
+            v-model="novoUsuario.nome"
+            type="text"
+            required
+            @blur="normalizarNome('nome')"
+          />
         </div>
         <div class="campo campo-apelidos">
           <label>Apelidos:</label>
-          <input v-model="novoUsuario.apelidos" type="text" required @blur="normalizarNome('apelidos')" />
+          <input
+            v-model="novoUsuario.apelidos"
+            type="text"
+            required
+            @blur="normalizarNome('apelidos')"
+          />
         </div>
       </div>
       <div class="fila">
@@ -51,6 +64,7 @@
           <input
             v-model="novoUsuario.movil"
             type="tel"
+            size="20"
             required
             pattern="[67][0-9]{8}"
             @input="mobilComprobado = false"
@@ -60,7 +74,7 @@
           />
         </div>
       </div>
-      
+
       <div class="fila">
         <div class="campo direccion">
           <label>Dirección:</label>
@@ -68,7 +82,10 @@
         </div>
         <div class="campo campo-provincia">
           <label>Provincia:</label>
-          <select v-model="novoUsuario.provincia" @change="novoUsuario.municipio = ''">
+          <select
+            v-model="novoUsuario.provincia"
+            @change="novoUsuario.municipio = ''"
+          >
             <option value="">-- Escolle unha provincia --</option>
             <option>A Coruña</option>
             <option>Lugo</option>
@@ -80,7 +97,11 @@
           <label>Municipio:</label>
           <select v-model="novoUsuario.municipio">
             <option value="">-- Escolle un municipio --</option>
-            <option v-for="municipio in municipiosVisibles" :key="municipio" :value="municipio">
+            <option
+              v-for="municipio in municipiosVisibles"
+              :key="municipio"
+              :value="municipio"
+            >
               {{ municipio }}
             </option>
           </select>
@@ -98,22 +119,40 @@
           <label>Tipo de conta:</label>
           <div class="inline-control radios">
             <label>
-              <input v-model="novoUsuario.tipoCuenta" type="radio" value="particular" />
+              <input
+                v-model="novoUsuario.tipoCuenta"
+                type="radio"
+                value="particular"
+              />
               <span>Particular</span>
             </label>
             <label>
-              <input v-model="novoUsuario.tipoCuenta" type="radio" value="empresa" />
+              <input
+                v-model="novoUsuario.tipoCuenta"
+                type="radio"
+                value="empresa"
+              />
               <span>Empresa</span>
             </label>
           </div>
         </div>
       </div>
-      <button type="submit" class="btn-guardar" :disabled="novoUsuario.dni === '' || novoUsuario.nome === '' || dniInvalido || mobilInvalido || correoInvalido">
+      <button
+        type="submit"
+        class="btn-guardar"
+        :disabled="
+          novoUsuario.dni === '' ||
+          novoUsuario.nome === '' ||
+          dniInvalido ||
+          mobilInvalido ||
+          correoInvalido
+        "
+      >
         Gardar
       </button>
     </form>
-    <h4>📋 Listaxe de usuarios</h4>
-    <table v-if="usuarios.length > 0">
+    <h4>📋 Listaxe de pacientes</h4>
+    <table v-if="pacientes.length > 0">
       <thead>
         <tr>
           <th>#</th>
@@ -127,15 +166,15 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(u, index) in usuarios" :key="index">
+        <tr v-for="(u, index) in pacientes" :key="index">
           <td>{{ index + 1 }}</td>
-          <td style="text-align: center;">{{ u.dni }}</td>
+          <td style="text-align: center">{{ u.dni }}</td>
           <td>{{ u.nome }}</td>
           <td>{{ u.correo }}</td>
           <td>{{ u.provincia }}</td>
-          <td style="text-align: center;">{{ u.activo ? "✅" : "❌" }}</td>
+          <td style="text-align: center">{{ u.activo ? "✅" : "❌" }}</td>
           <td>{{ u.tipoCuenta }}</td>
-          <td style="text-align: center;">
+          <td style="text-align: center">
             <button @click="editarUsuario(index)" title="Editar">✏️</button>
             <button @click="eliminarUsuario(index)" title="Eliminar">🗑️</button>
           </td>
@@ -143,33 +182,338 @@
       </tbody>
     </table>
 
-    <p v-else>Non hai usuarios cargados.</p>
+    <p v-else>Non hai pacientes cargados.</p>
   </div>
 </template>
 
 <script setup>
 /// Zona de declaracións
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from "vue";
 
-const usuarios = ref([])  //almacena la lista de usuarios e os seus cambios
-const dniComprobado = ref(false)
-const mobilComprobado = ref(false)
-const correoComprobado = ref(false)
+const pacientes = ref([]); //almacena la lista de pacientes e os seus cambios
+const dniComprobado = ref(false);
+const mobilComprobado = ref(false);
+const correoComprobado = ref(false);
 
-const municipiosPorProvincia = {
-  'A Coruña': [
-    'A Baña', 'A Capela', 'A Coruña', 'A Laracha', 'A Pobra do Caramiñal', 'A Pobra do Caramiñal', 'Ames', 'Aranga', 'Ares', 'Arteixo', 'Arzúa', 'As Pontes de García Rodríguez', 'Bergondo', 'Betanzos', 'Boimorto', 'Boiro', 'Boqueixón', 'Brión', 'Cabana de Bergantiños', 'Cabanas', 'Camariñas', 'Cambre', 'Carballo', 'Cariño', 'Cedeira', 'Cee', 'Cerceda', 'Cerdido', 'Coirós', 'Corcubión', 'Coristanco', 'Culleredo', 'Curtis', 'Dodro', 'Dumbría', 'Fene', 'Ferrol', 'Fisterra', 'Frades', 'Irixoa', 'Laxe', 'Lousame', 'Malpica de Bergantiños', 'Mañón', 'Mazaricos', 'Melide', 'Mesía', 'Miño', 'Moeche', 'Monfero', 'Mugardos', 'Muros', 'Muxía', 'Narón', 'Neda', 'Negreira', 'Noia', 'Oleiros', 'Ordes', 'Oroso', 'Ortigueira', 'Outes', 'Oza-Cesuras', 'Paderne', 'Padrón', 'Ponteceso', 'Pontedeume', 'Porto do Son', 'Rianxo', 'Ribeira', 'Rois', 'Sada', 'San Sadurniño', 'Santa Comba', 'Santiago de Compostela', 'Santiso', 'Sobrado', 'Somozas', 'Teo', 'Toques', 'Tordoia', 'Touro', 'Trazo', 'Val do Dubra', 'Valdoviño', 'Vedra', 'Vimianzo', 'Vilarmaior', 'Vilasantar', 'Zas'
+const municipiosPorProvincia = reactive({
+  "A Coruña": [
+    "A Baña",
+    "A Capela",
+    "A Coruña",
+    "A Laracha",
+    "A Pobra do Caramiñal",
+    "A Pobra do Caramiñal",
+    "Ames",
+    "Aranga",
+    "Ares",
+    "Arteixo",
+    "Arzúa",
+    "As Pontes de García Rodríguez",
+    "Bergondo",
+    "Betanzos",
+    "Boimorto",
+    "Boiro",
+    "Boqueixón",
+    "Brión",
+    "Cabana de Bergantiños",
+    "Cabanas",
+    "Camariñas",
+    "Cambre",
+    "Carballo",
+    "Cariño",
+    "Cedeira",
+    "Cee",
+    "Cerceda",
+    "Cerdido",
+    "Coirós",
+    "Corcubión",
+    "Coristanco",
+    "Culleredo",
+    "Curtis",
+    "Dodro",
+    "Dumbría",
+    "Fene",
+    "Ferrol",
+    "Fisterra",
+    "Frades",
+    "Irixoa",
+    "Laxe",
+    "Lousame",
+    "Malpica de Bergantiños",
+    "Mañón",
+    "Mazaricos",
+    "Melide",
+    "Mesía",
+    "Miño",
+    "Moeche",
+    "Monfero",
+    "Mugardos",
+    "Muros",
+    "Muxía",
+    "Narón",
+    "Neda",
+    "Negreira",
+    "Noia",
+    "Oleiros",
+    "Ordes",
+    "Oroso",
+    "Ortigueira",
+    "Outes",
+    "Oza-Cesuras",
+    "Paderne",
+    "Padrón",
+    "Ponteceso",
+    "Pontedeume",
+    "Porto do Son",
+    "Rianxo",
+    "Ribeira",
+    "Rois",
+    "Sada",
+    "San Sadurniño",
+    "Santa Comba",
+    "Santiago de Compostela",
+    "Santiso",
+    "Sobrado",
+    "Somozas",
+    "Teo",
+    "Toques",
+    "Tordoia",
+    "Touro",
+    "Trazo",
+    "Val do Dubra",
+    "Valdoviño",
+    "Vedra",
+    "Vimianzo",
+    "Vilarmaior",
+    "Vilasantar",
+    "Zas",
   ],
   Lugo: [
-    'Abadín', 'Alfoz', 'Antas de Ulla', 'A Pastoriza', 'A Pobra do Brollón', 'As Nogais', 'Baleira', 'Baralla', 'Barreiros', 'Becerreá', 'Begonte', 'Bóveda', 'Burela', 'Carballedo', 'Castro de Rei', 'Castroverde', 'Cervantes', 'Cervo', 'Chantada', 'Cospeito', 'Folgoso do Courel', 'Fonsagrada', 'Foz', 'Friol', 'Guitiriz', 'Guntín', 'Incio', 'Láncara', 'Lourenzá', 'Lugo', 'Meira', 'Mondoñedo', 'Monforte de Lemos', 'Monterroso', 'Muras', 'Navia de Suarna', 'Negueira de Muñiz', 'O Corgo', 'O Incio', 'O Páramo', 'O Saviñao', 'O Valadouro', 'O Vicedo', 'Ourol', 'Outeiro de Rei', 'Palas de Rei', 'Pantón', 'Paradela', 'Pedrafita do Cebreiro', 'Pol', 'Portomarín', 'Quiroga', 'Rábade', 'Ribadeo', 'Ribas de Sil', 'Ribeira de Piquín', 'Riotorto', 'Samos', 'Sarria', 'Sober', 'Taboada', 'Trabada', 'Triacastela', 'Valadouro', 'Viveiro', 'Xermade', 'Xove'
+    "Abadín",
+    "Alfoz",
+    "Antas de Ulla",
+    "A Pastoriza",
+    "A Pobra do Brollón",
+    "As Nogais",
+    "Baleira",
+    "Baralla",
+    "Barreiros",
+    "Becerreá",
+    "Begonte",
+    "Bóveda",
+    "Burela",
+    "Carballedo",
+    "Castro de Rei",
+    "Castroverde",
+    "Cervantes",
+    "Cervo",
+    "Chantada",
+    "Cospeito",
+    "Folgoso do Courel",
+    "Fonsagrada",
+    "Foz",
+    "Friol",
+    "Guitiriz",
+    "Guntín",
+    "Incio",
+    "Láncara",
+    "Lourenzá",
+    "Lugo",
+    "Meira",
+    "Mondoñedo",
+    "Monforte de Lemos",
+    "Monterroso",
+    "Muras",
+    "Navia de Suarna",
+    "Negueira de Muñiz",
+    "O Corgo",
+    "O Incio",
+    "O Páramo",
+    "O Saviñao",
+    "O Valadouro",
+    "O Vicedo",
+    "Ourol",
+    "Outeiro de Rei",
+    "Palas de Rei",
+    "Pantón",
+    "Paradela",
+    "Pedrafita do Cebreiro",
+    "Pol",
+    "Portomarín",
+    "Quiroga",
+    "Rábade",
+    "Ribadeo",
+    "Ribas de Sil",
+    "Ribeira de Piquín",
+    "Riotorto",
+    "Samos",
+    "Sarria",
+    "Sober",
+    "Taboada",
+    "Trabada",
+    "Triacastela",
+    "Valadouro",
+    "Viveiro",
+    "Xermade",
+    "Xove",
   ],
   Ourense: [
-    'Allariz', 'A Arnoia', 'Avión', 'Baltar', 'Bande', 'Baños de Molgas', 'Barbadás', 'Barco de Valdeorras', 'Beade', 'Beariz', 'Boborás', 'Bola', 'Bolo', 'Calvos de Randín', 'Carballeda', 'Carballeda de Avia', 'Carballiño', 'Cartelle', 'Castrelo de Miño', 'Castrelo do Val', 'Castro Caldelas', 'Celanova', 'Cenlle', 'Chandrexa de Queixa', 'Coles', 'Cortegada', 'Cualedro', 'Entrimo', 'Esgos', 'Gomesende', 'Gudiña', 'Irixo', 'Larouco', 'Laza', 'Leiro', 'Lobeira', 'Lobios', 'Maceda', 'Manzaneda', 'Maside', 'Melón', 'Merca', 'Mezquita', 'Montederramo', 'Monterrei', 'Muíños', 'Nogueira de Ramuín', 'O Barco de Valdeorras', 'O Bolo', 'O Carballiño', 'O Irixo', 'O Pereiro de Aguiar', 'Oímbra', 'Ourense', 'Paderne de Allariz', 'Padrenda', 'Parada de Sil', 'Pereiro de Aguiar', 'Peroxa', 'Petín', 'Piñor', 'Pontedeva', 'Porqueira', 'Punxín', 'Quintela de Leirado', 'Rairiz de Veiga', 'Ramirás', 'Ribadavia', 'Riós', 'Rúa', 'Rubiá', 'San Amaro', 'San Cibrao das Viñas', 'San Cristovo de Cea', 'San Xoán de Río', 'Sandiás', 'Sarreaus', 'Taboadela', 'Teixeira', 'Toén', 'Trasmiras', 'Veiga', 'Verea', 'Verín', 'Viana do Bolo', 'Vilamarín', 'Vilamartín de Valdeorras', 'Vilar de Barrio', 'Vilar de Santos', 'Vilardevós', 'Vilariño de Conso', 'Xinzo de Limia', 'Xunqueira de Ambía', 'Xunqueira de Espadanedo'
+    "Allariz",
+    "A Arnoia",
+    "Avión",
+    "Baltar",
+    "Bande",
+    "Baños de Molgas",
+    "Barbadás",
+    "Barco de Valdeorras",
+    "Beade",
+    "Beariz",
+    "Boborás",
+    "Bola",
+    "Bolo",
+    "Calvos de Randín",
+    "Carballeda",
+    "Carballeda de Avia",
+    "Carballiño",
+    "Cartelle",
+    "Castrelo de Miño",
+    "Castrelo do Val",
+    "Castro Caldelas",
+    "Celanova",
+    "Cenlle",
+    "Chandrexa de Queixa",
+    "Coles",
+    "Cortegada",
+    "Cualedro",
+    "Entrimo",
+    "Esgos",
+    "Gomesende",
+    "Gudiña",
+    "Irixo",
+    "Larouco",
+    "Laza",
+    "Leiro",
+    "Lobeira",
+    "Lobios",
+    "Maceda",
+    "Manzaneda",
+    "Maside",
+    "Melón",
+    "Merca",
+    "Mezquita",
+    "Montederramo",
+    "Monterrei",
+    "Muíños",
+    "Nogueira de Ramuín",
+    "O Barco de Valdeorras",
+    "O Bolo",
+    "O Carballiño",
+    "O Irixo",
+    "O Pereiro de Aguiar",
+    "Oímbra",
+    "Ourense",
+    "Paderne de Allariz",
+    "Padrenda",
+    "Parada de Sil",
+    "Pereiro de Aguiar",
+    "Peroxa",
+    "Petín",
+    "Piñor",
+    "Pontedeva",
+    "Porqueira",
+    "Punxín",
+    "Quintela de Leirado",
+    "Rairiz de Veiga",
+    "Ramirás",
+    "Ribadavia",
+    "Riós",
+    "Rúa",
+    "Rubiá",
+    "San Amaro",
+    "San Cibrao das Viñas",
+    "San Cristovo de Cea",
+    "San Xoán de Río",
+    "Sandiás",
+    "Sarreaus",
+    "Taboadela",
+    "Teixeira",
+    "Toén",
+    "Trasmiras",
+    "Veiga",
+    "Verea",
+    "Verín",
+    "Viana do Bolo",
+    "Vilamarín",
+    "Vilamartín de Valdeorras",
+    "Vilar de Barrio",
+    "Vilar de Santos",
+    "Vilardevós",
+    "Vilariño de Conso",
+    "Xinzo de Limia",
+    "Xunqueira de Ambía",
+    "Xunqueira de Espadanedo",
   ],
   Pontevedra: [
-    'A Cañiza', 'A Estrada', 'A Guarda', 'A Illa de Arousa', 'A Lama', 'Arbo', 'Baiona', 'Barro', 'Bueu', 'Caldas de Reis', 'Cambados', 'Campo Lameiro', 'Cangas', 'Catoira', 'Cerdedo-Cotobade', 'Covelo', 'Crecente', 'Cuntis', 'Dozón', 'Forcarei', 'Fornelos de Montes', 'Gondomar', 'Marín', 'Meaño', 'Meis', 'Moaña', 'Mondariz', 'Mondariz-Balneario', 'Moraña', 'Mos', 'As Neves', 'Nigrán', 'O Grove', 'Oia', 'Pazos de Borbén', 'Poio', 'Ponte Caldelas', 'Ponteareas', 'Pontecesures', 'Pontevedra', 'Porriño', 'Portas', 'Redondela', 'Ribadumia', 'Rodeiro', 'Salceda de Caselas', 'Salvaterra de Miño', 'Sanxenxo', 'Silleda', 'Soutomaior', 'Tomiño', 'Tui', 'Valga', 'Vigo', 'Vilaboa', 'Vila de Cruces', 'Vilagarcía de Arousa', 'Vilanova de Arousa'
-  ]
-}
+    "A Cañiza",
+    "A Estrada",
+    "A Guarda",
+    "A Illa de Arousa",
+    "A Lama",
+    "Arbo",
+    "Baiona",
+    "Barro",
+    "Bueu",
+    "Caldas de Reis",
+    "Cambados",
+    "Campo Lameiro",
+    "Cangas",
+    "Catoira",
+    "Cerdedo-Cotobade",
+    "Covelo",
+    "Crecente",
+    "Cuntis",
+    "Dozón",
+    "Forcarei",
+    "Fornelos de Montes",
+    "Gondomar",
+    "Marín",
+    "Meaño",
+    "Meis",
+    "Moaña",
+    "Mondariz",
+    "Mondariz-Balneario",
+    "Moraña",
+    "Mos",
+    "As Neves",
+    "Nigrán",
+    "O Grove",
+    "Oia",
+    "Pazos de Borbén",
+    "Poio",
+    "Ponte Caldelas",
+    "Ponteareas",
+    "Pontecesures",
+    "Pontevedra",
+    "Porriño",
+    "Portas",
+    "Redondela",
+    "Ribadumia",
+    "Rodeiro",
+    "Salceda de Caselas",
+    "Salvaterra de Miño",
+    "Sanxenxo",
+    "Silleda",
+    "Soutomaior",
+    "Tomiño",
+    "Tui",
+    "Valga",
+    "Vigo",
+    "Vilaboa",
+    "Vila de Cruces",
+    "Vilagarcía de Arousa",
+    "Vilanova de Arousa",
+  ],
+});
 
 const novoUsuario = reactive({
   dni: "",
@@ -179,106 +523,180 @@ const novoUsuario = reactive({
   provincia: "",
   municipio: "",
   activo: false,
-  tipoCuenta: ""
-})
+  tipoCuenta: "",
+});
 
 const dniInvalido = computed(() => {
-  const dni = novoUsuario.dni.toUpperCase()
+  const dni = novoUsuario.dni.toUpperCase();
 
   if (dni.length === 0) {
-    return false
+    return false;
   }
 
   if (!/^\d{8}[A-Z]$/.test(dni)) {
-    return true
+    return true;
   }
 
-  const letras = 'TRWAGMYFPDXBNJZSQVHLCKE'
-  return letras[Number(dni.slice(0, 8)) % 23] !== dni.at(-1)
-})
+  const letras = "TRWAGMYFPDXBNJZSQVHLCKE";
+  return letras[Number(dni.slice(0, 8)) % 23] !== dni.at(-1);
+});
 
 const mobilInvalido = computed(() => {
-  return novoUsuario.movil !== '' && !/^[67]\d{8}$/.test(novoUsuario.movil)
-})
+  return novoUsuario.movil !== "" && !/^[67]\d{8}$/.test(novoUsuario.movil);
+});
 
 const correoInvalido = computed(() => {
-  return novoUsuario.correo !== '' && !/^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+)*@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i.test(novoUsuario.correo)
-})
+  return (
+    novoUsuario.correo !== "" &&
+    !/^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+)*@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i.test(
+      novoUsuario.correo,
+    )
+  );
+});
 
 const municipiosVisibles = computed(() => {
   const municipios = novoUsuario.provincia
     ? municipiosPorProvincia[novoUsuario.provincia] || []
-    : Object.values(municipiosPorProvincia).flat()
-  const texto = novoUsuario.municipio.trim().toLocaleLowerCase('gl')
+    : Object.values(municipiosPorProvincia).flat();
+  const texto = novoUsuario.municipio.trim().toLocaleLowerCase("gl");
 
   return [...new Set(municipios)]
-    .filter(municipio => municipio.toLocaleLowerCase('gl').includes(texto))
-    .sort((a, b) => a.localeCompare(b, 'gl'))
-})
+    .filter((municipio) => municipio.toLocaleLowerCase("gl").includes(texto))
+    .sort((a, b) => a.localeCompare(b, "gl"));
+});
 
 /// Zona de ciclo de vida
 
-onMounted(() => {       //sempre se cargan estos usuarios de exemplo ao iniciar o componente
-  usuarios.value = [
-    { dni: "A000000C", nome: "Soldaduras SL", correo: "soldadura@email.com", provincia: "A Coruña", activo: true, tipoCuenta: "empresa" },
-    { dni: "0000000C", nome: "María Pérez", correo: "maria@email.com", provincia: "Lugo", activo: false, tipoCuenta: "particular" },
-    { dni: "B1234567D", nome: "Xosé López", correo: "xose@email.com", provincia: "Ourense", activo: true, tipoCuenta: "particular" },
-    { dni: "C9876543E", nome: "Construcións Modernas", correo: "construcion@email.com", provincia: "Pontevedra", activo: true, tipoCuenta: "empresa" }
-  ]
-})
+onMounted(async () => {
+  try {
+    const respuesta = await fetch("http://localhost:3000/api/municipios");
+    if (!respuesta.ok) {
+      throw new Error("No se pudieron cargar los municipios");
+    }
+
+    const datos = await respuesta.json();
+    const nombresProvincias = Object.fromEntries(
+      datos.provincias.map((provincia) => [provincia.id, provincia.nm]),
+    );
+    const municipiosCargados = {};
+
+    datos.municipios.forEach((municipio) => {
+      const nombreProvincia = nombresProvincias[municipio.id.slice(0, 2)];
+      if (!nombreProvincia) {
+        return;
+      }
+
+      if (!municipiosCargados[nombreProvincia]) {
+        municipiosCargados[nombreProvincia] = [];
+      }
+      municipiosCargados[nombreProvincia].push(municipio.nm);
+    });
+
+    Object.keys(municipiosPorProvincia).forEach((provincia) => {
+      delete municipiosPorProvincia[provincia];
+    });
+    Object.assign(municipiosPorProvincia, municipiosCargados);
+  } catch (error) {
+    console.error("Error al cargar los municipios:", error);
+  }
+
+  //sempre se cargan estos pacientes de exemplo ao iniciar o componente
+  pacientes.value = [
+    {
+      dni: "A000000C",
+      nome: "Soldaduras SL",
+      correo: "soldadura@email.com",
+      provincia: "A Coruña",
+      activo: true,
+      tipoCuenta: "empresa",
+    },
+    {
+      dni: "0000000C",
+      nome: "María Pérez",
+      correo: "maria@email.com",
+      provincia: "Lugo",
+      activo: false,
+      tipoCuenta: "particular",
+    },
+    {
+      dni: "B1234567D",
+      nome: "Xosé López",
+      correo: "xose@email.com",
+      provincia: "Ourense",
+      activo: true,
+      tipoCuenta: "particular",
+    },
+    {
+      dni: "C9876543E",
+      nome: "Construcións Modernas",
+      correo: "construcion@email.com",
+      provincia: "Pontevedra",
+      activo: true,
+      tipoCuenta: "empresa",
+    },
+  ];
+});
 
 /// Zona de métodos ou funcións
 
 function normalizarDni() {
-  novoUsuario.dni = novoUsuario.dni.trim().toUpperCase()
-  dniComprobado.value = novoUsuario.dni !== ''
+  novoUsuario.dni = novoUsuario.dni.trim().toUpperCase();
+  dniComprobado.value = novoUsuario.dni !== "";
 }
 
 function normalizarNome(campo) {
   novoUsuario[campo] = novoUsuario[campo]
     .trim()
     .toLowerCase()
-    .replace(/(^|\s)\S/g, letra => letra.toUpperCase())
+    .replace(/(^|\s)\S/g, (letra) => letra.toUpperCase());
 }
 
 function comprobarMobil() {
-  novoUsuario.movil = novoUsuario.movil.trim()
-  mobilComprobado.value = true
+  novoUsuario.movil = novoUsuario.movil.trim();
+  mobilComprobado.value = true;
 }
 
 function comprobarCorreo() {
-  novoUsuario.correo = novoUsuario.correo.trim()
-  correoComprobado.value = true
+  novoUsuario.correo = novoUsuario.correo.trim();
+  correoComprobado.value = true;
 }
 
 function gardarUsuario() {
   if (dniInvalido.value) {
-    return
+    return;
   }
 
-  usuarios.value.push({ ...novoUsuario })  //engade o novo usuario á lista (copia do obxecto)
-  Object.assign(novoUsuario, { dni: "", nome: "", apelidos: "", correo: "", provincia: "", municipio: "", activo: false, tipoCuenta: "" }) //reinicia o formulario
-  dniComprobado.value = false
-  mobilComprobado.value = false
-  correoComprobado.value = false
+  pacientes.value.push({ ...novoUsuario }); //engade o novo usuario á lista (copia do obxecto)
+  Object.assign(novoUsuario, {
+    dni: "",
+    nome: "",
+    apelidos: "",
+    correo: "",
+    provincia: "",
+    municipio: "",
+    activo: false,
+    tipoCuenta: "",
+  }); //reinicia o formulario
+  dniComprobado.value = false;
+  mobilComprobado.value = false;
+  correoComprobado.value = false;
 }
 
 function eliminarUsuario(index) {
-  usuarios.value.splice(index, 1);   //elimina o usuario da lista
+  pacientes.value.splice(index, 1); //elimina o usuario da lista
 }
 
 function editarUsuario(index) {
-  const usuario = usuarios.value[index];   //carga os datos do usuario elixido no formulario
-  Object.assign(novoUsuario, usuario);  // carga os datos do usuario no formulario recorda v-model do formulario é novoUsuario
-  dniComprobado.value = false
-  mobilComprobado.value = false
-  correoComprobado.value = false
+  const usuario = pacientes.value[index]; //carga os datos do usuario elixido no formulario
+  Object.assign(novoUsuario, usuario); // carga os datos do usuario no formulario recorda v-model do formulario é novoUsuario
+  dniComprobado.value = false;
+  mobilComprobado.value = false;
+  correoComprobado.value = false;
 }
-
 </script>
 
 <style scoped>
-.xestion-usuarios {
+.xestion-pacientes {
   width: 100%;
   /* opcional para que no crezca demasiado en pantallas muy grandes */
   background: white;
@@ -306,6 +724,13 @@ form {
 }
 
 .fila-centrada {
+  justify-content: center;
+  align-items: center;
+  column-gap: 3rem;
+}
+
+.fila-centrada .campo {
+  flex: 0 1 auto;
   justify-content: center;
 }
 
@@ -348,8 +773,8 @@ form {
 }
 
 .dni-control input.dni-correcto {
-  border-color: #00bb74;
-  box-shadow: 0 0 0 2px rgba(0, 187, 116, 0.15);
+  border-color: #1cca88;
+  box-shadow: 0 0 0 2px rgba(28, 202, 136, 0.15);
 }
 
 .mensaxe-dni {
@@ -375,7 +800,7 @@ form {
 }
 
 .campo-correo {
-  flex: 1.4 1 0;
+  flex: 2.4 1 0;
   border-radius: 0px;
 }
 
@@ -388,10 +813,12 @@ form {
 }
 
 .movil {
-  flex: 2 1 0;
+  flex: 0 0 auto;
 }
 
 .movil input {
+  flex: 0 0 20ch;
+  width: 20ch;
   text-align: center;
 }
 
@@ -462,9 +889,10 @@ form {
 
 .btn-guardar {
   background-color: #fff;
-  color: #00bb74;
-  border: 2px solid #00bb74;
-  padding: 0.4rem 1.5rem;
+  color: #009900;
+  border: 2px solid #009900;
+  padding: 0.5rem 1.7rem;
+  font-size: 1rem;
   border-radius: 8px;
   cursor: pointer;
   margin: 0 auto;
@@ -472,7 +900,7 @@ form {
 }
 
 .btn-guardar:hover {
-  background-color: #00bb74;
+  background-color: #009900;
   color: #fff;
   border-radius: 8px;
 }
@@ -532,12 +960,12 @@ th {
 h4 {
   margin-bottom: 1rem;
   font-weight: 600;
-  background-color: #58e4ae;
+  background-color: #009900;
   color: white;
 }
 
 @media (max-width: 768px) {
-  .xestion-usuarios {
+  .xestion-pacientes {
     padding: 1rem;
     /* reducir el padding en pantallas pequeñas */
   }

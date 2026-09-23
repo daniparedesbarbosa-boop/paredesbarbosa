@@ -1,23 +1,30 @@
 <template>
   <div id="app">
+    <NavBar />
     <!-- Aquí se carga el componente principal DE MOMENTO-->
-    <XestionUsuarios />
+    <main>
+      <router-view />
+    </main>
+    <FooTer />
   </div>
 </template>
 
 <script setup>
 import XestionUsuarios from './components/XestionPacientes.vue'
+import NavBar from './components/NavBar.vue'
+import FooTer from './components/FooTer.vue'
 </script>
 
 <style>
 /* 👇 Estilos globales mínimos */
-:global(body) {
+body {
   margin: 0;               /* quita el margen por defecto del body */
-  background: #f6f6f6;     /* color de fondo general */
+  background: #fff;        /* color de fondo general */
 }
 
 #app {
   max-width: 80vw;
+  background: #fff;
   margin: 0 auto;          /* centra horizontalmente */
   padding-top: 1rem;       /* 🔹 margen superior pequeño */
   padding-bottom: 1rem;    /* 🔹 espacio para el futuro footer */
