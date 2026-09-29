@@ -7,7 +7,7 @@
           <label>DNI/CIF:</label>
           <div class="dni-control">
             <input
-              v-model="novoUsuario.dni"
+              v-model="novoPaciente.dnipac"
               type="text"
               required
               autocomplete="off"
@@ -26,31 +26,31 @@
         <div class="campo campo-nome">
           <label>Nome:</label>
           <input
-            v-model="novoUsuario.nome"
+            v-model="novoPaciente.nomepac"
             type="text"
             required
-            @blur="normalizarNome('nome')"
+            @blur="normalizarNome('nomepac')"
           />
         </div>
         <div class="campo campo-apelidos">
           <label>Apelidos:</label>
           <input
-            v-model="novoUsuario.apelidos"
+            v-model="novoPaciente.apelpac"
             type="text"
             required
-            @blur="normalizarNome('apelidos')"
+            @blur="normalizarNome('apelpac')"
           />
         </div>
       </div>
       <div class="fila">
         <div class="campo fecha-nacimiento">
           <label>Fecha de nacemento:</label>
-          <input v-model="novoUsuario.fechaNacimiento" type="date" required />
+          <input v-model="novoPaciente.nacipac" type="date" required />
         </div>
         <div class="campo campo-correo">
           <label>Correo:</label>
           <input
-            v-model="novoUsuario.correo"
+            v-model="novoPaciente.mailpac"
             type="email"
             required
             @input="correoComprobado = false"
@@ -62,7 +62,7 @@
         <div class="campo movil">
           <label>Móbil:</label>
           <input
-            v-model="novoUsuario.movil"
+            v-model="novoPaciente.movilpac"
             type="tel"
             size="20"
             required
@@ -78,13 +78,14 @@
       <div class="fila">
         <div class="campo direccion">
           <label>Dirección:</label>
-          <input v-model="novoUsuario.direccion" type="text" required />
+          <input v-model="novoPaciente.dirpac" type="text" required />
         </div>
         <div class="campo campo-provincia">
           <label>Provincia:</label>
           <select
-            v-model="novoUsuario.provincia"
+            v-model="novoPaciente.propac"
             @change="cargarMunicipios"
+            required
           >
           <option value="">-- Escolle unha provincia --</option>
             <option v-for="provincia in provincias" :key="provincia.id" :value="provincia.id">
@@ -94,7 +95,7 @@
         </div>
         <div class="campo campo-municipio">
           <label>Municipio:</label>
-          <select id="municipio" v-model="novoUsuario.municipio">
+            <select id="municipio" v-model="novoPaciente.munipac" required>
             <option value="">-- Escolle un municipio --</option>
             <option
               v-for="municipio in municipios"
@@ -106,42 +107,15 @@
           </select>
         </div>
       </div>
-      <div class="fila fila-centrada">
-        <div class="campo inline-activo">
-          <label>Activo:</label>
-          <div class="inline-control">
-            <input v-model="novoUsuario.activo" type="checkbox" />
-            <span>Activo</span>
-          </div>
-        </div>
-        <div class="campo inline-cuenta">
-          <label>Tipo de conta:</label>
-          <div class="inline-control radios">
-            <label>
-              <input
-                v-model="novoUsuario.tipoCuenta"
-                type="radio"
-                value="particular"
-              />
-              <span>Particular</span>
-            </label>
-            <label>
-              <input
-                v-model="novoUsuario.tipoCuenta"
-                type="radio"
-                value="empresa"
-              />
-              <span>Empresa</span>
-            </label>
-          </div>
-        </div>
-      </div>
       <button
         type="submit"
         class="btn-guardar"
         :disabled="
-          novoUsuario.dni === '' ||
-          novoUsuario.nome === '' ||
+          novoPaciente.dnipac === '' ||
+          novoPaciente.nomepac === '' ||
+          novoPaciente.propac === '' ||
+          novoPaciente.munipac === '' ||
+          guardando ||
           dniInvalido ||
           mobilInvalido ||
           correoInvalido
@@ -150,6 +124,7 @@
         Gardar
       </button>
     </form>
+    <p v-if="mensaxeErro" class="mensaxe-erro">{{ mensaxeErro }}</p>
     <h4>📋 Listaxe de pacientes</h4>
     <table v-if="pacientes.length > 0">
       <thead>
@@ -159,20 +134,16 @@
           <th>Nome</th>
           <th>Correo</th>
           <th>Provincia</th>
-          <th>Activo</th>
-          <th>Tipo de conta</th>
           <th>Accións</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(u, index) in pacientes" :key="index">
           <td>{{ index + 1 }}</td>
-          <td style="text-align: center">{{ u.dni }}</td>
-          <td>{{ u.nome }}</td>
-          <td>{{ u.correo }}</td>
-          <td>{{ u.provincia }}</td>
-          <td style="text-align: center">{{ u.activo ? "✅" : "❌" }}</td>
-          <td>{{ u.tipoCuenta }}</td>
+          <td style="text-align: center">{{ u.dnipac }}</td>
+          <td>{{ u.nomepac }}</td>
+          <td>{{ u.mailpac }}</td>
+          <td>{{ u.propac }}</td>
           <td style="text-align: center">
             <button @click="editarUsuario(index)" title="Editar">✏️</button>
             <button @click="eliminarUsuario(index)" title="Eliminar">🗑️</button>
@@ -189,26 +160,30 @@
 /// Zona de declaracións
 import { ref, reactive, computed, onMounted } from "vue";
 import { obtenerMunicipios,obtenerProvincias } from "../api/municipios.js";
+import { obtenerPacientes, savePaciente } from "../api/pacientes.js";
 
 const pacientes = ref([]); //almacena la lista de pacientes e os seus cambios
 const dniComprobado = ref(false);
 const mobilComprobado = ref(false);
 const correoComprobado = ref(false);
 const municipios = ref([]);
+const guardando = ref(false);
+const mensaxeErro = ref("");
 
-const novoUsuario = reactive({
-  dni: "",
-  nome: "",
-  apelidos: "",
-  correo: "",
-  provincia: "",
-  municipio: "",
-  activo: false,
-  tipoCuenta: "",
+const novoPaciente = reactive({
+  dnipac: "",
+  nomepac: "",
+  apelpac: "",
+  nacipac: "",
+  mailpac: "",
+  movilpac: "",
+  dirpac: "",
+  propac: "",
+  munipac: "",
 });
 
 const dniInvalido = computed(() => {
-  const dni = novoUsuario.dni.toUpperCase();
+  const dni = novoPaciente.dnipac.toUpperCase();
 
   if (dni.length === 0) {
     return false;
@@ -223,114 +198,99 @@ const dniInvalido = computed(() => {
 });
 
 const mobilInvalido = computed(() => {
-  return novoUsuario.movil !== "" && !/^[67]\d{8}$/.test(novoUsuario.movil);
+  return novoPaciente.movilpac !== "" && !/^[67]\d{8}$/.test(novoPaciente.movilpac);
 });
 
 const correoInvalido = computed(() => {
   return (
-    novoUsuario.correo !== "" &&
+    novoPaciente.mailpac !== "" &&
     !/^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+)*@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i.test(
-      novoUsuario.correo,
+      novoPaciente.mailpac,
     )
   );
 });
 
-/// Zona de ciclo de vida
 const provincias = ref([]);
+
 onMounted(async () => {
+  try {
+    pacientes.value = await obtenerPacientes();
+  } catch (error) {
+    console.error("Error ao cargar pacientes:", error);
+  }
 
-  //sempre se cargan estos pacientes de exemplo ao iniciar o componente
-  pacientes.value = [
-    {
-      dni: "A000000C",
-      nome: "Soldaduras SL",
-      correo: "soldadura@email.com",
-      provincia: "A Coruña",
-      activo: true,
-      tipoCuenta: "empresa",
-    },
-    {
-      dni: "0000000C",
-      nome: "María Pérez",
-      correo: "maria@email.com",
-      provincia: "Lugo",
-      activo: false,
-      tipoCuenta: "particular",
-    },
-    {
-      dni: "B1234567D",
-      nome: "Xosé López",
-      correo: "xose@email.com",
-      provincia: "Ourense",
-      activo: true,
-      tipoCuenta: "particular",
-    },
-    {
-      dni: "C9876543E",
-      nome: "Construcións Modernas",
-      correo: "construcion@email.com",
-      provincia: "Pontevedra",
-      activo: true,
-      tipoCuenta: "empresa",
-    },
-  ];
-
-  provincias.value = await obtenerProvincias();
-
+  try {
+    provincias.value = await obtenerProvincias();
+  } catch (error) {
+    console.error("Error ao cargar provincias:", error);
+  }
 });
 
 /// Zona de métodos ou funcións
 
 async function cargarMunicipios() {
-  if (novoUsuario.provincia === "") {
+  if (novoPaciente.propac === "") {
     municipios.value = [];
     return;
   }
 
-  municipios.value = await obtenerMunicipios(novoUsuario.provincia);
+  municipios.value = await obtenerMunicipios(novoPaciente.propac);
 }
 
 function normalizarDni() {
-  novoUsuario.dni = novoUsuario.dni.trim().toUpperCase();
-  dniComprobado.value = novoUsuario.dni !== "";
+  novoPaciente.dnipac = novoPaciente.dnipac.trim().toUpperCase();
+  dniComprobado.value = novoPaciente.dnipac !== "";
 }
 
 function normalizarNome(campo) {
-  novoUsuario[campo] = novoUsuario[campo]
+  novoPaciente[campo] = novoPaciente[campo]
     .trim()
     .toLowerCase()
     .replace(/(^|\s)\S/g, (letra) => letra.toUpperCase());
 }
 
 function comprobarMobil() {
-  novoUsuario.movil = novoUsuario.movil.trim();
+  novoPaciente.movilpac = novoPaciente.movilpac.trim();
   mobilComprobado.value = true;
 }
 
 function comprobarCorreo() {
-  novoUsuario.correo = novoUsuario.correo.trim();
+  novoPaciente.mailpac = novoPaciente.mailpac.trim();
   correoComprobado.value = true;
 }
 
-function gardarUsuario() {
+async function gardarUsuario() {
   if (dniInvalido.value) {
     return;
   }
 
-  pacientes.value.push({ ...novoUsuario }); //engade o novo usuario á lista (copia do obxecto)
-  Object.assign(novoUsuario, {
-    dni: "",
-    nome: "",
-    apelidos: "",
-    correo: "",
-    provincia: "",
-    municipio: "",
-    activo: false,
-    tipoCuenta: "",
-  }); //reinicia o formulario
-  dniComprobado.value = false;
-  mobilComprobado.value = false;
-  correoComprobado.value = false;
+  guardando.value = true;
+  mensaxeErro.value = "";
+
+  try {
+    const pacienteGardado = await savePaciente({ ...novoPaciente });
+    pacientes.value.push(pacienteGardado);
+    Object.assign(novoPaciente, {
+      dnipac: "",
+      nomepac: "",
+      apelpac: "",
+      nacipac: "",
+      mailpac: "",
+      movilpac: "",
+      dirpac: "",
+      propac: "",
+      munipac: "",
+    }); //reinicia o formulario
+    municipios.value = [];
+    dniComprobado.value = false;
+    mobilComprobado.value = false;
+    correoComprobado.value = false;
+  } catch (error) {
+    console.error("Error ao gardar paciente:", error);
+    mensaxeErro.value = "Non se puido gardar o paciente. Comproba a conexión con MongoDB.";
+  } finally {
+    guardando.value = false;
+  }
 }
 
 function eliminarUsuario(index) {
@@ -339,7 +299,7 @@ function eliminarUsuario(index) {
 
 function editarUsuario(index) {
   const usuario = pacientes.value[index]; //carga os datos do usuario elixido no formulario
-  Object.assign(novoUsuario, usuario); // carga os datos do usuario no formulario recorda v-model do formulario é novoUsuario
+  Object.assign(novoPaciente, usuario); // carga os datos do usuario no formulario recorda v-model do formulario é novoPaciente
   dniComprobado.value = false;
   mobilComprobado.value = false;
   correoComprobado.value = false;
@@ -372,17 +332,6 @@ form {
   gap: 1rem;
   width: 100%;
   min-width: 0;
-}
-
-.fila-centrada {
-  justify-content: center;
-  align-items: center;
-  column-gap: 3rem;
-}
-
-.fila-centrada .campo {
-  flex: 0 1 auto;
-  justify-content: center;
 }
 
 .campo {
@@ -561,31 +510,6 @@ form {
   border: 2px solid #ddd;
   cursor: pointer;
   font-size: 1rem;
-}
-
-.inline-control {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding-right: 0;
-  font-size: 0.85rem;
-}
-
-.radios {
-  flex-wrap: nowrap;
-  gap: 0.9rem;
-}
-
-.radios label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  min-width: 0;
-  white-space: nowrap;
-}
-
-.radios input {
-  flex: 0 0 auto;
 }
 
 table {

@@ -2,19 +2,21 @@ import express from "express";
 import fs from "fs";
 import cors from "cors";
 import "dotenv/config";
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
+import pacientesRutas from "./rutas/pacientes.rutas.js"; //importa el modelo del paciente y todas las funciones asociadas
 
 //Crear la aplicacion express
 const app = express();
 app.use(cors());
+//Para que pueda leer json
+app.use(express.json());
+//Usa el modelo del paciente
+app.use("/api/pacientes", pacientesRutas); 
 
 //Usa el puerto definido en el archivo .env o el puerto 3000 si no se define
 const PORT = process.env.PORT || 3000;
 
 const MONGO_URI = process.env.MONGO_URI;
-
-//Creamos el cliente MongoDB o la cadena de conexión
-const client = new MongoClient(MONGO_URI);
 
 //Ruta de la API para obtener proincias y municipios
 app.get('/api/municipios', (req, res) => {
@@ -32,13 +34,14 @@ app.get('/api/municipios', (req, res) => {
 
 // Iniciar el servidor en el puerto 3000
 async function iniciarServer() {
+  app.listen(PORT, () => {
+    console.log(`Servidor funcionando en http://localhost:${PORT}`);
+  });
+
   try {
     //Conectamos con mongoDB
-    await client.connect();
+    await mongoose.connect(MONGO_URI);
     console.log("Conexión exitosa a MongoDB");
-    app.listen(PORT, () => {
-      console.log("Servidor funcionando en http://localhost:${PORT}");
-    });
   } catch (error) {
     console.error("Error al conectar con MongoDB:", error);
   }

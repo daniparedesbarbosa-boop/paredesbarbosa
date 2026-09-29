@@ -8,9 +8,9 @@ const pacienteSchema = new mongoose.Schema(
     nomepac: { type: String, required: true },
     apelpac: { type: String, required: true },
     nacipac: { type: String, required: true },
-    mailpac: { type: String, required: true },
+    mailpac: { type: String, required: false },
     movilpac: { type: String, required: true },
-    dirpac: { type: String, required: true },
+    dirpac: { type: String, required: false },
     propac: { type: String, required: true },
     munipac: { type: String, required: true }
   },
@@ -20,4 +20,4 @@ const pacienteSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.model("Paciente", pacienteSchema);
+export default mongoose.model("pacientes", pacienteSchema);
