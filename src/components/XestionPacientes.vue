@@ -293,8 +293,13 @@ async function gardarUsuario() {
   }
 }
 
-function eliminarUsuario(index) {
-  pacientes.value.splice(index, 1); //elimina o usuario da lista
+async function eliminarPaciente(index) {
+  try {
+    await deletePaciente(pacientes.value[index].dnipac);
+    pacientes.value.splice(index, 1); //elimina o usuario da lista
+  } catch (error) {
+    console.error("Error ao eliminar paciente:", error);
+  }
 }
 
 function editarUsuario(index) {

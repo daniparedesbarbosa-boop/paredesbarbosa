@@ -10,7 +10,9 @@ router.get("/", async (req, res) => {
     res.json(pacientes);
   } catch (error) {
     console.error("Error al obtener pacientes:", error);
-    res.status(500).json({ mensaje: "Error al obtener pacientes" });
+    res.status(500).json({
+      mensaje: "Error al obtener pacientes",
+    });
   }
 });
 
@@ -28,6 +30,31 @@ router.post("/", async (req, res) => {
 
     res.status(500).json({
       mensaje: "Error al crear paciente",
+      error,
+    });
+  }
+});
+
+//Eliminar
+router.delete("/:dni", async (req, res) => {
+  try {
+    const paciente = await Paciente.findOneAndDelete({
+      dnipac: req.params.dni,
+    });
+
+    if (!paciente) {
+      return res.status(404).json({
+        mensaje: "Paciente no encontrado",
+      });
+    }
+
+    res.json({
+      mensaje: "Paciente eliminado",
+    });
+  } catch (error) {
+    res.status(500).json({
+      mensaje: "Error al eliminar paciente",
+      error,
     });
   }
 });

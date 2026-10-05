@@ -34,18 +34,18 @@ app.get('/api/municipios', (req, res) => {
 
 // Iniciar el servidor en el puerto 3000
 async function iniciarServer() {
-  app.listen(PORT, () => {
-    console.log(`Servidor funcionando en http://localhost:${PORT}`);
-  });
-
   try {
     //Conectamos con mongoDB
     await mongoose.connect(MONGO_URI);
     console.log("Conexión exitosa a MongoDB");
+
+    app.listen(PORT, () => {
+      console.log(`Servidor funcionando en http://localhost:${PORT}`);
+    });
   } catch (error) {
     console.error("Error al conectar con MongoDB:", error);
+    process.exitCode = 1;
   }
-  
 }
 
 iniciarServer();
