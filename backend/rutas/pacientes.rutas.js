@@ -19,7 +19,15 @@ router.get("/", async (req, res) => {
 //Crear
 router.post("/", async (req, res) => {
   try {
-    console.log("Datos recibidos:", req.body);
+    const pacienteExistente = await Paciente.findOne({
+      dnipac: req.body.dnipac,
+    });
+    if (pacienteExistente) {
+      return res.status(409).json({
+        mensaje: "Ya existe un paciente con ese DNI",
+      });
+    }
+
     const nuevoPaciente = new Paciente(req.body);
 
     await nuevoPaciente.save();
@@ -54,6 +62,33 @@ router.delete("/:dni", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       mensaje: "Error al eliminar paciente",
+      error,
+    });
+  }
+});
+
+//Modificar paciente
+router.put("/:dni", async (req, res) => {
+  try {
+    const paciente = await Paciente.findOneAndUpdate(
+      {
+        dnipac: req.params.dni,
+      },
+      req.body,
+      { new: true },
+    );
+
+    if (!paciente) {
+      return res.status(404).json({
+        mensaje: "Paciente no encontrado",
+      });
+    }
+
+    res.json(paciente);
+
+  } catch (error) {
+    res.status(500).json({
+      mensaje: "Error al modificar paciente",
       error,
     });
   }

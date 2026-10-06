@@ -15,12 +15,16 @@
               @input="dniComprobado = false"
               @blur="normalizarDni"
               :class="{
-                'dni-invalido': dniInvalido,
+                'dni-invalido': dniComprobado && dniInvalido,
                 'dni-correcto': dniComprobado && !dniInvalido,
               }"
-              :aria-invalid="dniInvalido"
+              :aria-invalid="dniComprobado && dniInvalido"
             />
-            <small v-if="dniInvalido" class="mensaxe-dni">DNI inválido</small>
+            <small v-if="dniComprobado && dniInvalido" class="mensaxe-dni">
+              DNI inválido
+            </small>
+            <button type="button" @click="buscarPaciente" style="font-size: 20px;">🔍</button>
+            <button type="button" @click="editarPaciente" style="font-size: 20px;">✏️</button>
           </div>
         </div>
         <div class="campo campo-nome">
@@ -107,14 +111,29 @@
           </select>
         </div>
       </div>
+
+      <div class="campo-condicions">
+        <label>
+          <input v-model="novoPaciente.lopdpac" type="checkbox" /> Aceptar la
+          <a
+            :href="$router.resolve({ name: 'PoliticaPrivacidad' }).href"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Política de Privacidad y Confidencialidad
+          </a>
+        </label>
+      </div>
+
       <button
         type="submit"
         class="btn-guardar"
         :disabled="
           novoPaciente.dnipac === '' ||
           novoPaciente.nomepac === '' ||
-          novoPaciente.propac === '' ||
-          novoPaciente.munipac === '' ||
+          novoPaciente.apelpac === '' ||
+          novoPaciente.movilpac === '' ||
+          !novoPaciente.lopdpac ||
           guardando ||
           dniInvalido ||
           mobilInvalido ||
@@ -146,7 +165,7 @@
           <td>{{ u.propac }}</td>
           <td style="text-align: center">
             <button @click="editarUsuario(index)" title="Editar">✏️</button>
-            <button @click="eliminarUsuario(index)" title="Eliminar">🗑️</button>
+            <button @click="eliminarPaciente(index)" title="Eliminar">🗑️</button>
           </td>
         </tr>
       </tbody>
@@ -160,9 +179,15 @@
 /// Zona de declaracións
 import { ref, reactive, computed, onMounted } from "vue";
 import { obtenerMunicipios,obtenerProvincias } from "../api/municipios.js";
-import { obtenerPacientes, savePaciente } from "../api/pacientes.js";
+import {
+  getPacientes,
+  savePaciente,
+  deletePaciente,
+  modifyPaciente,
+} from "../api/pacientes.js";
 
 const pacientes = ref([]); //almacena la lista de pacientes e os seus cambios
+const editando = ref(false); //indica se estamos editando un paciente existente
 const dniComprobado = ref(false);
 const mobilComprobado = ref(false);
 const correoComprobado = ref(false);
@@ -180,6 +205,7 @@ const novoPaciente = reactive({
   dirpac: "",
   propac: "",
   munipac: "",
+  lopdpac: false,
 });
 
 const dniInvalido = computed(() => {
@@ -214,7 +240,7 @@ const provincias = ref([]);
 
 onMounted(async () => {
   try {
-    pacientes.value = await obtenerPacientes();
+    pacientes.value = await getPacientes();
   } catch (error) {
     console.error("Error ao cargar pacientes:", error);
   }
@@ -309,6 +335,42 @@ function editarUsuario(index) {
   mobilComprobado.value = false;
   correoComprobado.value = false;
 }
+
+async function buscarPaciente() {
+  try {
+    const dni = novoPaciente.dnipac.trim();
+
+    if (!dni) {
+      mensaxeErro.value = "Introduce un DNI.";
+      return;
+    }
+
+    const pacientesCargados = await getPacientes();
+    const paciente = pacientesCargados.find(
+      (pacienteActual) => pacienteActual.dnipac?.toUpperCase() === dni.toUpperCase(),
+    );
+
+    if (!paciente) {
+      mensaxeErro.value = "Non se atopou ningún paciente con ese DNI.";
+      return;
+    }
+
+    Object.assign(novoPaciente, paciente);
+    await cargarMunicipios();
+    dniComprobado.value = true;
+    mobilComprobado.value = true;
+    correoComprobado.value = true;
+    mensaxeErro.value = "";
+  } catch (error) {
+    console.error("Error ao buscar paciente:", error);
+    mensaxeErro.value = "Ocorreu un erro ao buscar o paciente. Comproba a conexión con MongoDB.";
+  }
+}
+
+async function editarPaciente() {
+  await buscarPaciente();
+}
+
 </script>
 
 <style scoped>
@@ -350,8 +412,8 @@ form {
 }
 
 .campo-dni {
-  flex: 0 1 250px;
-  min-width: 250px;
+  flex: 0 1 310px;
+  min-width: 310px;
   border-radius: 0px;
 }
 
@@ -364,9 +426,9 @@ form {
 }
 
 .dni-control input {
-  flex: 0 0 100px;
-  width: 100px;
-  min-width: 100px;
+  flex: 0 0 125px;
+  width: 125px;
+  min-width: 125px;
 }
 
 .dni-control input.dni-invalido {
@@ -396,7 +458,7 @@ form {
 }
 
 .campo-apelidos {
-  flex: 2.5 1 0;
+  flex: 2 1 0;
 }
 
 .fecha-nacimiento {

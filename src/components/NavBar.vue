@@ -12,6 +12,7 @@
     <ul :class="['menu', { open: isOpen }]">
       <li><RouterLink to="/">Inicio</RouterLink></li>
       <li><RouterLink to="/pacientes">Pacientes</RouterLink></li>
+      <li><RouterLink to="/doctores">Doctores</RouterLink></li>
       <li><RouterLink to="/sobrenos">Sobre nós</RouterLink></li>
     </ul>
   </nav>

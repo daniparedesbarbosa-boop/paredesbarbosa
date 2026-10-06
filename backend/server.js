@@ -4,6 +4,7 @@ import cors from "cors";
 import "dotenv/config";
 import mongoose from "mongoose";
 import pacientesRutas from "./rutas/pacientes.rutas.js"; //importa el modelo del paciente y todas las funciones asociadas
+import doctoresRutas from "./rutas/doctores.rutas.js"; //importa el modelo del doctor y todas las funciones asociadas
 
 //Crear la aplicacion express
 const app = express();
@@ -12,6 +13,8 @@ app.use(cors());
 app.use(express.json());
 //Usa el modelo del paciente
 app.use("/api/pacientes", pacientesRutas); 
+//Usa el modelo del doctor
+app.use("/api/doctores", doctoresRutas);
 
 //Usa el puerto definido en el archivo .env o el puerto 3000 si no se define
 const PORT = process.env.PORT || 3000;
@@ -24,6 +27,19 @@ app.get('/api/municipios', (req, res) => {
 
   // Leer el archivo JSON
   const datos = fs.readFileSync("./backend/data/municipios.json", "utf-8");
+
+  // Convertir el contenido del archivo a un objeto JavaScript
+  const datosJSON = JSON.parse(datos);
+
+  // Enviar la respuesta como respuesta al cliente
+  res.json(datosJSON);
+});
+
+app.get('/api/especialidades', (req, res) => {
+  console.log("Petición recibida");
+
+  // Leer el archivo JSON
+  const datos = fs.readFileSync("./backend/data/especialidades.json", "utf-8");
 
   // Convertir el contenido del archivo a un objeto JavaScript
   const datosJSON = JSON.parse(datos);
