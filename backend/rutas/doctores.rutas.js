@@ -16,6 +16,20 @@ router.get("/", async (req, res) => {
   }
 });
 
+//Obtener doctores por especialidad
+router.get("/:especialidad", async (req, res) => {
+  try {
+    const doctores = await Doctor.find({
+      especialidad: req.params.especialidad,
+    });
+    res.json(doctores);
+  } catch (error) {
+    res.status(500).json({
+      mensaje: "Error al obtener doctores",
+    });
+  }
+});
+
 //Crear
 router.post("/", async (req, res) => {
   try {
@@ -112,7 +126,6 @@ router.put("/:iddoc", async (req, res) => {
     }
 
     res.json(doctor);
-
   } catch (error) {
     res.status(500).json({
       mensaje: "Error al modificar doctor",
