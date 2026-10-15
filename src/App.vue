@@ -15,23 +15,23 @@ import FooTer from './components/FooTer.vue'
 </script>
 
 <style>
-/* 👇 Estilos globales mínimos */
 body {
-  margin: 0;               /* quita el margen por defecto del body */
-  background: #fff;        /* color de fondo general */
+  margin: 0;
+  background: #fff;
 }
 
 #app {
   max-width: 80vw;
   background: #fff;
-  margin: 0 auto;          /* centra horizontalmente */
-  padding-top: 1rem;       /* 🔹 margen superior pequeño */
-  padding-bottom: 1rem;    /* 🔹 espacio para el futuro footer */
-  min-height: 100vh;       /* ocupa toda la altura de la pantalla */
+  margin: 0 auto;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* el contenido empieza arriba */
+  justify-content: flex-start;
 }
+
 /* Cuando la pantalla es menor a 768px */
 @media (max-width: 768px) {
   .container {
