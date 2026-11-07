@@ -1,8 +1,9 @@
 <template>
+  <!-- Estructura común: menú arriba, página elegida en el centro y pie abajo. -->
   <div id="app">
     <NavBar />
-    <!-- Aquí se carga el componente principal DE MOMENTO-->
-    <main>
+    <!-- El router sustituye este contenido por el componente de cada URL. -->
+    <main class="flex-1">
       <router-view />
     </main>
     <FooTer />
@@ -10,11 +11,13 @@
 </template>
 
 <script setup>
+// Componentes que aparecen en todas las páginas.
 import NavBar from './components/NavBar.vue'
 import FooTer from './components/FooTer.vue'
 </script>
 
 <style>
+/* Estilos generales del contenedor principal de la aplicación. */
 body {
   margin: 0;
   background: #fff;
@@ -32,7 +35,7 @@ body {
   justify-content: flex-start;
 }
 
-/* Cuando la pantalla es menor a 768px */
+/* En móvil, los elementos preparados con .container se apilan. */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;

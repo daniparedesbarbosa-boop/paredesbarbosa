@@ -1,16 +1,17 @@
+// Consulta provincias y municipios al backend para rellenar los selectores.
 import axios from "axios";
 
-//Dirección de la API
+// Endpoint que entrega ambos catálogos.
 const URL =  "http://localhost:3000/api/municipios";
 
-//Obtener todos las provincias
+// Obtiene las provincias para el primer selector.
 export async function obtenerProvincias() {
     const respuesta = await axios.get(URL)
 
     return respuesta.data.provincias
 }
 
-//Obtener los municipios de una provincia
+// Obtiene todos los municipios y filtra en el navegador por provincia.
 export async function obtenerMunicipios(idProvincia) {
     const respuesta = await axios.get(URL)
 

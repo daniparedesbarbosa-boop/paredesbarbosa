@@ -1,14 +1,15 @@
 <template>
+  <!-- Cabecera común: logo y enlaces que cambian la ruta sin recargar la SPA. -->
   <nav class="navbar">
     <div class="logo">
       <img :src="cruz" alt="" />
       <span>Sanidad Teis</span>
     </div>
 
-    <!-- NUEVO -->
+    <!-- En pantallas pequeñas abre y cierra el menú. -->
     <button class="hamburger" @click="isOpen = !isOpen">☰</button>
 
-    <!-- MODIFICADO -->
+    <!-- RouterLink comunica cada enlace con router/index.js. -->
     <ul :class="['menu', { open: isOpen }]">
       <li><RouterLink to="/">Inicio</RouterLink></li>
       <li><RouterLink to="/pacientes">Pacientes</RouterLink></li>
@@ -20,12 +21,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue"; // será boolean
+// ref permite que Vue redibuje el menú cuando cambia su estado.
+import { ref } from "vue";
 import cruz from "../assets/img/cruz.png";
-const isOpen = ref(false); // actívase cuando fago click
+const isOpen = ref(false);
 </script>
 
 <style scoped>
+/* scoped limita estos estilos a este componente. */
 .navbar {
   display: flex;
   justify-content: space-between;

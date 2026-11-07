@@ -1,4 +1,5 @@
 <template>
+  <!-- Pie compartido con enlace a la información legal. -->
   <footer class="footer-content footer">
     <ul class="link-aviso">
      <router-link to="/avisolegal" target="_blank" class="aviso_legal">Aviso Legal</router-link>
@@ -10,6 +11,7 @@
 <script setup></script>
 
 <style scoped>
+/* El pie se mantiene visualmente separado del contenido principal. */
 .footer {
   background: #004800;
   color: white;

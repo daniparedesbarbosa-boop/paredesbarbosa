@@ -1,14 +1,16 @@
 <template>
+  <!-- Pantalla CRUD de pacientes: formulario, validaciones y tabla de resultados. -->
   <div class="xestion-pacientes">
     <h4>👥 Xestión de pacientes</h4>
     <form @submit.prevent="gardarUsuario">
       <div class="fila">
         <div class="campo campo-dni">
-          <label>DNI/CIF:</label>
           <div class="dni-control">
             <input
               v-model="novoPaciente.dnipac"
               type="text"
+              placeholder="DNI/CIF"
+              aria-label="DNI/CIF"
               required
               autocomplete="off"
               style="text-align: center"
@@ -23,24 +25,26 @@
             <small v-if="dniComprobado && dniInvalido" class="mensaxe-dni">
               DNI inválido
             </small>
-            <button type="button" @click="buscarPaciente" style="font-size: 20px;">🔍</button>
-            <button type="button" @click="editarPaciente" style="font-size: 20px;">✏️</button>
+            <button type="button" @click="buscarPaciente" style="font-size: 20px;" title="Buscar paciente">🔍</button>
+            <button type="button" @click="editarPaciente" style="font-size: 20px;" title="Guardar cambios">✏️</button>
           </div>
         </div>
         <div class="campo campo-nome">
-          <label>Nome:</label>
           <input
             v-model="novoPaciente.nomepac"
             type="text"
+            placeholder="Nome"
+            aria-label="Nome"
             required
             @blur="normalizarNome('nomepac')"
           />
         </div>
         <div class="campo campo-apelidos">
-          <label>Apelidos:</label>
           <input
             v-model="novoPaciente.apelpac"
             type="text"
+            placeholder="Apelidos"
+            aria-label="Apelidos"
             required
             @blur="normalizarNome('apelpac')"
           />
@@ -48,14 +52,20 @@
       </div>
       <div class="fila">
         <div class="campo fecha-nacimiento">
-          <label>Fecha de nacemento:</label>
-          <input v-model="novoPaciente.nacipac" type="date" required />
+          <input
+            v-model="novoPaciente.nacipac"
+            type="date"
+            aria-label="Fecha de nacemento"
+            :class="{ 'campo-vacio': !novoPaciente.nacipac }"
+            required
+          />
         </div>
         <div class="campo campo-correo">
-          <label>Correo:</label>
           <input
             v-model="novoPaciente.mailpac"
             type="email"
+            placeholder="Correo electrónico"
+            aria-label="Correo electrónico"
             required
             @input="correoComprobado = false"
             @blur="comprobarCorreo"
@@ -64,10 +74,11 @@
           />
         </div>
         <div class="campo movil">
-          <label>Móbil:</label>
           <input
             v-model="novoPaciente.movilpac"
             type="tel"
+            placeholder="Móbil"
+            aria-label="Móbil"
             size="20"
             required
             pattern="[67][0-9]{8}"
@@ -81,13 +92,13 @@
 
       <div class="fila">
         <div class="campo direccion">
-          <label>Dirección:</label>
-          <input v-model="novoPaciente.dirpac" type="text" required />
+          <input v-model="novoPaciente.dirpac" type="text" placeholder="Dirección" aria-label="Dirección" required />
         </div>
         <div class="campo campo-provincia">
-          <label>Provincia:</label>
           <select
             v-model="novoPaciente.propac"
+            aria-label="Provincia"
+            :class="{ 'campo-vacio': !novoPaciente.propac }"
             @change="cargarMunicipios"
             required
           >
@@ -98,8 +109,13 @@
           </select>
         </div>
         <div class="campo campo-municipio">
-          <label>Municipio:</label>
-            <select id="municipio" v-model="novoPaciente.munipac" required>
+            <select
+              id="municipio"
+              v-model="novoPaciente.munipac"
+              aria-label="Municipio"
+              :class="{ 'campo-vacio': !novoPaciente.munipac }"
+              required
+            >
             <option value="">-- Escolle un municipio --</option>
             <option
               v-for="municipio in municipios"
@@ -144,7 +160,12 @@
       </button>
     </form>
     <p v-if="mensaxeErro" class="mensaxe-erro">{{ mensaxeErro }}</p>
-    <h4>📋 Listaxe de pacientes</h4>
+    <div class="listaxe-cabecera">
+      <h4>📋 Listaxe de pacientes</h4>
+      <button type="button" class="btn-buscar" @click="cargarPacientes" title="Actualizar listaxe">
+        ⟳
+      </button>
+    </div>
     <table v-if="pacientes.length > 0">
       <thead>
         <tr>
@@ -162,7 +183,8 @@
           <td style="text-align: center">{{ u.dnipac }}</td>
           <td>{{ u.nomepac }}</td>
           <td>{{ u.mailpac }}</td>
-          <td>{{ u.propac }}</td>
+          <!-- MongoDB guarda el código; en la tabla enseñamos el nombre. -->
+          <td>{{ nombreProvincia(u.propac) }}</td>
           <td style="text-align: center">
             <button @click="editarUsuario(index)" title="Editar">✏️</button>
             <button @click="eliminarPaciente(index)" title="Eliminar">🗑️</button>
@@ -176,7 +198,7 @@
 </template>
 
 <script setup>
-/// Zona de declaracións
+// Estado de la pantalla y funciones que hablan con la API HTTP.
 import { ref, reactive, computed, onMounted } from "vue";
 import { obtenerMunicipios,obtenerProvincias } from "../api/municipios.js";
 import {
@@ -185,9 +207,12 @@ import {
   deletePaciente,
   modifyPaciente,
 } from "../api/pacientes.js";
+import { alertaError, alertaExito } from "../utils/alertas.js";
 
-const pacientes = ref([]); //almacena la lista de pacientes e os seus cambios
+// La API devuelve los pacientes guardados en MongoDB para mostrarlos en la tabla.
+const pacientes = ref([]);
 const editando = ref(false); //indica se estamos editando un paciente existente
+const dniOriginal = ref("");
 const dniComprobado = ref(false);
 const mobilComprobado = ref(false);
 const correoComprobado = ref(false);
@@ -208,6 +233,7 @@ const novoPaciente = reactive({
   lopdpac: false,
 });
 
+// computed recalcula las validaciones automáticamente al escribir.
 const dniInvalido = computed(() => {
   const dni = novoPaciente.dnipac.toUpperCase();
 
@@ -238,21 +264,40 @@ const correoInvalido = computed(() => {
 
 const provincias = ref([]);
 
-onMounted(async () => {
+// Convierte el código guardado (por ejemplo, "36") en su nombre visible.
+// Si un registro antiguo ya guardaba el nombre, lo conserva sin romper la tabla.
+function nombreProvincia(codigoOProvincia) {
+  const provincia = provincias.value.find(
+    (item) =>
+      String(item.id) === String(codigoOProvincia) ||
+      item.nm === codigoOProvincia,
+  );
+  return provincia?.nm || codigoOProvincia;
+}
+
+async function cargarPacientes() {
   try {
     pacientes.value = await getPacientes();
+    mensaxeErro.value = "";
   } catch (error) {
     console.error("Error ao cargar pacientes:", error);
+    mensaxeErro.value = error.response?.data?.mensaje ||
+      "Non se puideron cargar os pacientes. Comproba que o backend estea iniciado.";
   }
+}
 
+onMounted(async () => {
+  // Carga inicial: pacientes desde la BBDD y provincias desde el catálogo del backend.
+  await cargarPacientes();
   try {
     provincias.value = await obtenerProvincias();
   } catch (error) {
     console.error("Error ao cargar provincias:", error);
+    mensaxeErro.value = "Non se puideron cargar as provincias.";
   }
 });
 
-/// Zona de métodos ou funcións
+// Métodos llamados por submit, botones y cambios de los selectores.
 
 async function cargarMunicipios() {
   if (novoPaciente.propac === "") {
@@ -294,8 +339,28 @@ async function gardarUsuario() {
   mensaxeErro.value = "";
 
   try {
-    const pacienteGardado = await savePaciente({ ...novoPaciente });
-    pacientes.value.push(pacienteGardado);
+    // POST: el backend guarda en MongoDB y devuelve el documento creado.
+    const estabaEditando = editando.value;
+    const datosPaciente = {
+      dnipac: novoPaciente.dnipac,
+      nomepac: novoPaciente.nomepac,
+      apelpac: novoPaciente.apelpac,
+      nacipac: novoPaciente.nacipac,
+      mailpac: novoPaciente.mailpac,
+      movilpac: novoPaciente.movilpac,
+      dirpac: novoPaciente.dirpac,
+      propac: novoPaciente.propac,
+      munipac: novoPaciente.munipac,
+      lopdpac: novoPaciente.lopdpac,
+    };
+    const pacienteGardado = estabaEditando
+      ? await modifyPaciente(dniOriginal.value, datosPaciente)
+      : await savePaciente(datosPaciente);
+    const posicion = pacientes.value.findIndex(
+      (paciente) => paciente.dnipac === pacienteGardado.dnipac,
+    );
+    if (posicion === -1) pacientes.value.push(pacienteGardado);
+    else pacientes.value[posicion] = pacienteGardado;
     Object.assign(novoPaciente, {
       dnipac: "",
       nomepac: "",
@@ -306,14 +371,19 @@ async function gardarUsuario() {
       dirpac: "",
       propac: "",
       munipac: "",
+      lopdpac: false,
     }); //reinicia o formulario
     municipios.value = [];
+    editando.value = false;
+    dniOriginal.value = "";
     dniComprobado.value = false;
     mobilComprobado.value = false;
     correoComprobado.value = false;
+    await alertaExito(estabaEditando ? "Paciente modificado." : "Paciente gardado.");
   } catch (error) {
     console.error("Error ao gardar paciente:", error);
     mensaxeErro.value = "Non se puido gardar o paciente. Comproba a conexión con MongoDB.";
+    await alertaError(mensaxeErro.value);
   } finally {
     guardando.value = false;
   }
@@ -321,16 +391,22 @@ async function gardarUsuario() {
 
 async function eliminarPaciente(index) {
   try {
+    // DELETE en backend y, solo si funciona, actualización de la tabla local.
     await deletePaciente(pacientes.value[index].dnipac);
     pacientes.value.splice(index, 1); //elimina o usuario da lista
+    await alertaExito("Paciente eliminado.");
   } catch (error) {
     console.error("Error ao eliminar paciente:", error);
+    await alertaError("Non se puido eliminar o paciente.");
   }
 }
 
 function editarUsuario(index) {
+  // Copia el registro seleccionado al formulario para revisarlo.
   const usuario = pacientes.value[index]; //carga os datos do usuario elixido no formulario
   Object.assign(novoPaciente, usuario); // carga os datos do usuario no formulario recorda v-model do formulario é novoPaciente
+  editando.value = true;
+  dniOriginal.value = usuario.dnipac;
   dniComprobado.value = false;
   mobilComprobado.value = false;
   correoComprobado.value = false;
@@ -345,6 +421,7 @@ async function buscarPaciente() {
       return;
     }
 
+    // La búsqueda actual lee la lista del backend y filtra por DNI en el navegador.
     const pacientesCargados = await getPacientes();
     const paciente = pacientesCargados.find(
       (pacienteActual) => pacienteActual.dnipac?.toUpperCase() === dni.toUpperCase(),
@@ -356,6 +433,8 @@ async function buscarPaciente() {
     }
 
     Object.assign(novoPaciente, paciente);
+    editando.value = true;
+    dniOriginal.value = paciente.dnipac;
     await cargarMunicipios();
     dniComprobado.value = true;
     mobilComprobado.value = true;
@@ -368,12 +447,23 @@ async function buscarPaciente() {
 }
 
 async function editarPaciente() {
-  await buscarPaciente();
+  if (!editando.value || !dniOriginal.value) {
+    mensaxeErro.value = "Primeiro busca un paciente coa lupa.";
+    return;
+  }
+
+  await gardarUsuario();
 }
 
 </script>
 
 <style scoped>
+/* Estilos locales de la ficha de pacientes y sus controles. */
+.campo-condicions a {
+  color: #009900;
+  text-decoration: underline;
+}
+
 .xestion-pacientes {
   width: 100%;
   /* opcional para que no crezca demasiado en pantallas muy grandes */
@@ -529,25 +619,43 @@ form {
 
 .campo input {
   flex: 1;
-  /* ocupa todo el espacio restante */
-  padding: 0.5rem;
+  padding: 0.65rem;
   border: 1px solid #ddd;
-  border-radius: 0px;
+  border-radius: 6px;
   box-sizing: border-box;
   min-width: 0;
   max-width: 100%;
-  font-size: 0.85rem;
+  font: inherit;
+  font-size: 0.9rem;
   background-color: #fff;
   color: #000;
   -webkit-text-fill-color: #000;
+}
+
+.campo input::placeholder {
+  color: #6b6375;
+  -webkit-text-fill-color: #6b6375;
+  opacity: 1;
+}
+
+.campo input.campo-vacio {
+  color: #6b6375;
+  -webkit-text-fill-color: #6b6375;
 }
 
 .campo select {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  font-size: 0.85rem;
+  font: inherit;
+  font-size: 0.9rem;
   background-color: #fff;
+  border-radius: 6px;
+}
+
+.campo select.campo-vacio {
+  color: #6b6375;
+  -webkit-text-fill-color: #6b6375;
 }
 
 .fecha-nacimiento input {

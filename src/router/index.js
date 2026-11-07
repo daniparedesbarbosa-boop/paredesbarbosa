@@ -1,3 +1,4 @@
+// El router relaciona cada URL con el componente que debe mostrarse.
 import { createRouter, createWebHistory } from "vue-router";
 import IniCio from "../components/IniCio.vue";
 import XestionPacientes from "../components/XestionPacientes.vue";
@@ -9,6 +10,7 @@ import NotFound from "../components/NotFound.vue";
 import Citas from "../components/Citas.vue";
 
 const routes = [
+  // Página inicial y pantallas principales de gestión.
   { path: "/", name: "inicio", component: IniCio },
   { path: "/pacientes", name: "pacientes", component: XestionPacientes },
   { path: "/doctores", name: "doctores", component: XestionDoctores },
@@ -20,6 +22,8 @@ const routes = [
 ];
 
 const router = createRouter({
+  // Usa URLs normales del navegador; el servidor debe devolver index.html
+  // cuando se recarga una ruta interna.
   history: createWebHistory(),
   routes,
 });
@@ -27,3 +31,4 @@ const router = createRouter({
 
 
 export default router;
+  // Páginas informativas y pantalla para URLs inexistentes.

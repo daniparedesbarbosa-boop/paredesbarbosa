@@ -5,16 +5,23 @@ import "dotenv/config";
 import mongoose from "mongoose";
 import pacientesRutas from "./rutas/pacientes.rutas.js"; //importa el modelo del paciente y todas las funciones asociadas
 import doctoresRutas from "./rutas/doctores.rutas.js"; //importa el modelo del doctor y todas las funciones asociadas
+import citasRutas from "./rutas/citas.rutas.js";
 
 //Crear la aplicacion express
 const app = express();
 app.use(cors());
+// Asegura que las respuestas de texto se interpreten siempre como UTF-8.
+app.use((req, res, next) => {
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  next();
+});
 //Para que pueda leer json
 app.use(express.json());
 //Usa el modelo del paciente
 app.use("/api/pacientes", pacientesRutas); 
 //Usa el modelo del doctor
 app.use("/api/doctores", doctoresRutas);
+app.use("/api/citas", citasRutas);
 
 //Usa el puerto definido en el archivo .env o el puerto 3000 si no se define
 const PORT = process.env.PORT || 3000;

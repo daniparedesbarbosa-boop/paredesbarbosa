@@ -1,4 +1,5 @@
 <template>
+  <!-- Formulario y tabla local de citas. Actualmente no llama a la API. -->
   <div class="xestion-pacientes">
     <h4>📅 Xestión de Citas 🩺</h4>
 
@@ -18,6 +19,7 @@
             v-model="novaCita.data"
             type="date"
             aria-label="Data da cita"
+            :class="{ 'campo-vacio': !novaCita.data }"
             required
           />
         </div>
@@ -30,6 +32,9 @@
         >
           🧹
         </button>
+        <button type="button" class="btn-buscar" title="Recargar citas" @click="cargarCitas">
+          ⟳
+        </button>
       </div>
 
       <div class="fila">
@@ -39,6 +44,7 @@
             type="text"
             placeholder="ID do paciente"
             aria-label="ID do paciente"
+            class="texto-centrado"
             required
           />
         </div>
@@ -48,6 +54,7 @@
             type="text"
             placeholder="ID Doctor"
             aria-label="ID do doctor"
+            class="texto-centrado"
             required
           />
         </div>
@@ -55,12 +62,12 @@
 
       <div class="fila fila-detalles">
         <div class="campo campo-hora">
-          <label for="hora-cita">Hora Cita:</label>
           <input
             id="hora-cita"
             v-model="novaCita.hora"
             type="time"
             aria-label="Hora da cita"
+            :class="{ 'campo-vacio': !novaCita.hora }"
             required
           />
         </div>
@@ -74,7 +81,13 @@
           />
         </div>
         <div class="campo campo-estado">
-          <select v-model="novaCita.estado" aria-label="Estado da cita" required>
+          <select
+            v-model="novaCita.estado"
+            aria-label="Estado da cita"
+            :class="{ 'campo-vacio': !novaCita.estado }"
+            required
+          >
+            <option value="">Estado da cita</option>
             <option value="Pendiente">Pendiente</option>
             <option value="Confirmada">Confirmada</option>
             <option value="Cancelada">Cancelada</option>
@@ -116,6 +129,7 @@
           <th>Doctor</th>
           <th>Hora</th>
           <th>Estado</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -126,19 +140,42 @@
           <td>{{ cita.idDoctor }}</td>
           <td>{{ cita.hora }}</td>
           <td>{{ cita.estado }}</td>
+          <td><button type="button" @click="borrarCita(cita.id)">🗑️</button></td>
         </tr>
       </tbody>
     </table>
     <p v-else>Non hai citas cargadas ou falla a conexión coa BBDD.</p>
+    <button v-if="citas.length" type="button" class="btn-pdf" @click="descargarInforme">
+      Descargar informe PDF
+    </button>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+// reactive guarda el formulario; ref guarda la lista y los mensajes.
+import { onMounted, reactive, ref } from "vue";
+import { deleteCita, getCitas, saveCita } from "../api/citas.js";
+import { alertaError, alertaExito } from "../utils/alertas.js";
+import jsPDF from "jspdf";
 
 const citas = ref([]);
 const mostrarListaxe = ref(true);
 const mensaxeErro = ref("");
+
+async function cargarCitas() {
+  try {
+    citas.value = await getCitas();
+    mensaxeErro.value = "";
+  } catch (error) {
+    console.error("Error ao cargar citas:", error);
+    mensaxeErro.value = error.response?.data?.mensaje ||
+      "Non se puideron cargar as citas. Comproba que o backend estea iniciado.";
+  }
+}
+
+onMounted(async () => {
+  await cargarCitas();
+});
 
 const novaCita = reactive({
   id: "",
@@ -147,24 +184,38 @@ const novaCita = reactive({
   idDoctor: "",
   hora: "",
   motivo: "",
-  estado: "Pendiente",
+  estado: "",
   observacions: "",
 });
 
-function gardarCita() {
+async function gardarCita() {
   const cita = { ...novaCita };
-
-  if (citas.value.some((citaExistente) => citaExistente.id === cita.id)) {
-    mensaxeErro.value = "Xa existe unha cita con ese ID.";
-    return;
+  try {
+    const citaGardada = await saveCita(cita);
+    citas.value.push(citaGardada);
+    mensaxeErro.value = "";
+    limparFormulario();
+    await alertaExito("A cita gardouse correctamente.");
+  } catch (error) {
+    console.error("Error ao gardar cita:", error);
+    mensaxeErro.value = error.response?.data?.mensaje || "Non se puido gardar a cita.";
+    await alertaError(mensaxeErro.value);
   }
+}
 
-  citas.value.push(cita);
-  mensaxeErro.value = "";
-  limparFormulario();
+async function borrarCita(id) {
+  try {
+    await deleteCita(id);
+    citas.value = citas.value.filter((cita) => cita.id !== id);
+    await alertaExito("A cita eliminouse correctamente.");
+  } catch (error) {
+    console.error("Error ao eliminar cita:", error);
+    await alertaError("Non se puido eliminar a cita.");
+  }
 }
 
 function limparFormulario() {
+  // Restablece el formulario para poder introducir otra cita.
   Object.assign(novaCita, {
     id: "",
     data: "",
@@ -172,9 +223,22 @@ function limparFormulario() {
     idDoctor: "",
     hora: "",
     motivo: "",
-    estado: "Pendiente",
+    estado: "",
     observacions: "",
   });
+}
+
+function descargarInforme() {
+  const documento = new jsPDF();
+  documento.text("Informe de citas", 20, 20);
+  citas.value.forEach((cita, index) => {
+    documento.text(
+      `${cita.data} ${cita.hora} - Paciente: ${cita.idPaciente} - Doctor: ${cita.idDoctor} - ${cita.estado}`,
+      20,
+      35 + index * 8,
+    );
+  });
+  documento.save("informe-citas.pdf");
 }
 </script>
 
@@ -242,6 +306,25 @@ textarea::placeholder {
   flex: 0 1 165px;
 }
 
+.campo-id-cita input {
+  text-align: center;
+}
+
+.texto-centrado {
+  text-align: center;
+}
+
+.campo-data input.campo-vacio,
+.campo-hora input.campo-vacio {
+  color: #6b6375;
+  -webkit-text-fill-color: #6b6375;
+}
+
+.campo select.campo-vacio {
+  color: #6b6375;
+  -webkit-text-fill-color: #6b6375;
+}
+
 .campo-data {
   flex: 0 1 175px;
 }
@@ -252,7 +335,7 @@ textarea::placeholder {
 }
 
 .campo-hora {
-  flex: 0 1 230px;
+  flex: 0 1 100px;
 }
 
 .campo-hora label {

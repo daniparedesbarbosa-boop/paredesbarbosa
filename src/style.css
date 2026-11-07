@@ -1,3 +1,7 @@
+@import "tailwindcss";
+
+/* Hoja de estilos globales: variables, tipografía y reglas comunes.
+   Los componentes pueden añadir estilos propios con <style scoped>. */
 :root {
   --text: #6b6375;
   --text-h: #08060d;

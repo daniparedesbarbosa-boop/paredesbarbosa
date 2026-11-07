@@ -1,4 +1,7 @@
-<template> <div class="politica-privacidad"> <h4>Política de privacidad y confidencialidad</h4>
+<template>
+  <!-- Texto informativo que se abre desde el formulario de pacientes. -->
+  <div class="politica-privacidad">
+  <h4>Política de privacidad y confidencialidad</h4>
 <h5>Protección de datos y confidencialidad</h5>
 
 <p>

@@ -1,5 +1,6 @@
 import express from "express";
 import Paciente from "../modelos/paciente.js";
+import Cita from "../modelos/cita.js";
 
 const router = express.Router();
 
@@ -70,18 +71,50 @@ router.delete("/:dni", async (req, res) => {
 //Modificar paciente
 router.put("/:dni", async (req, res) => {
   try {
+    const dniAnterior = req.params.dni;
+    const {
+      dnipac,
+      nomepac,
+      apelpac,
+      nacipac,
+      mailpac,
+      movilpac,
+      dirpac,
+      propac,
+      munipac,
+      lopdpac,
+    } = req.body;
     const paciente = await Paciente.findOneAndUpdate(
       {
-        dnipac: req.params.dni,
+        dnipac: dniAnterior,
       },
-      req.body,
-      { new: true },
+      {
+        dnipac,
+        nomepac,
+        apelpac,
+        nacipac,
+        mailpac,
+        movilpac,
+        dirpac,
+        propac,
+        munipac,
+        lopdpac,
+      },
+      { new: true, runValidators: true },
     );
 
     if (!paciente) {
       return res.status(404).json({
         mensaje: "Paciente no encontrado",
       });
+    }
+
+    // Si cambia el DNI, las citas también deben apuntar al nuevo DNI.
+    if (dniAnterior !== paciente.dnipac) {
+      await Cita.updateMany(
+        { idPaciente: dniAnterior },
+        { $set: { idPaciente: paciente.dnipac } },
+      );
     }
 
     res.json(paciente);
