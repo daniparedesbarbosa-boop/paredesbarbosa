@@ -1,470 +1,590 @@
 <template>
-  <!-- Formulario y tabla local de citas. Actualmente no llama a la API. -->
-  <div class="xestion-pacientes">
-    <h4>📅 Xestión de Citas 🩺</h4>
+  <section class="appointment-page">
+    <div class="section-title">
+      <h1>🗓️ Gestión de citas</h1>
+      <span class="section-title__status">Agenda médica</span>
+    </div>
 
-    <form @submit.prevent="gardarCita">
-      <div class="fila">
-        <div class="campo campo-id-cita">
-          <input
-            v-model="novaCita.id"
-            type="text"
-            placeholder="ID cita"
-            aria-label="ID cita"
-            required
-          />
-        </div>
-        <div class="campo campo-data">
-          <input
-            v-model="novaCita.data"
-            type="date"
-            aria-label="Data da cita"
-            :class="{ 'campo-vacio': !novaCita.data }"
-            required
-          />
-        </div>
-        <button
-          type="button"
-          class="btn-accion"
-          title="Limpar formulario"
-          aria-label="Limpar formulario"
-          @click="limparFormulario"
-        >
-          🧹
-        </button>
-        <button type="button" class="btn-buscar" title="Recargar citas" @click="cargarCitas">
-          ⟳
-        </button>
-      </div>
+    <div class="appointment-layout">
+      <form class="appointment-form" @submit.prevent="guardarCita">
+        <div class="form-grid">
+          <label class="form-field">
+            <span>ID cita</span>
+            <input :value="cita._id || 'Se genera al guardar'" type="text" disabled>
+          </label>
 
-      <div class="fila">
-        <div class="campo campo-paciente">
-          <input
-            v-model="novaCita.idPaciente"
-            type="text"
-            placeholder="ID do paciente"
-            aria-label="ID do paciente"
-            class="texto-centrado"
-            required
-          />
-        </div>
-        <div class="campo campo-doctor">
-          <input
-            v-model="novaCita.idDoctor"
-            type="text"
-            placeholder="ID Doctor"
-            aria-label="ID do doctor"
-            class="texto-centrado"
-            required
-          />
-        </div>
-      </div>
+          <label class="form-field">
+            <span>Paciente</span>
+            <input
+              :value="nombrePacienteFormulario"
+              type="text"
+              readonly
+              :class="{ 'form-field__placeholder': !cita.pacienteId }"
+            >
+          </label>
 
-      <div class="fila fila-detalles">
-        <div class="campo campo-hora">
-          <input
-            id="hora-cita"
-            v-model="novaCita.hora"
-            type="time"
-            aria-label="Hora da cita"
-            :class="{ 'campo-vacio': !novaCita.hora }"
-            required
-          />
+          <label class="form-field">
+            <span>Doctor</span>
+            <input
+              :value="nombreDoctorFormulario"
+              type="text"
+              readonly
+              :class="{ 'form-field__placeholder': !cita.doctorId }"
+            >
+          </label>
+
+          <label class="form-field">
+            <span>Fecha</span>
+            <input v-model="cita.fecha" type="date" required>
+          </label>
+
+          <label class="form-field">
+            <span>Hora</span>
+            <input v-model="cita.hora" type="time" required>
+          </label>
+
+          <label class="form-field">
+            <span>Estado</span>
+            <select v-model="cita.estado" required>
+              <option value="pendente">Pendiente</option>
+              <option value="confirmada">Confirmada</option>
+              <option value="realizada">Realizada</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+          </label>
+
+          <label class="form-field form-field--wide">
+            <span>Motivo de la cita</span>
+            <input
+              v-model.trim="cita.motivo"
+              type="text"
+              maxlength="250"
+              placeholder="Describe brevemente el motivo"
+              required
+            >
+          </label>
+
+          <label class="form-field form-field--wide">
+            <span>Observaciones</span>
+            <textarea
+              v-model.trim="cita.observacions"
+              rows="3"
+              maxlength="1000"
+              placeholder="Información adicional (opcional)"
+            ></textarea>
+          </label>
         </div>
-        <div class="campo campo-motivo">
-          <input
-            v-model="novaCita.motivo"
-            type="text"
-            placeholder="Motivo da cita"
-            aria-label="Motivo da cita"
-            required
-          />
+
+        <p v-if="!cita.pacienteId || !cita.doctorId" class="form-hint">
+          Selecciona un paciente y un doctor para guardar una cita.
+        </p>
+        <p v-if="!cargando && !doctores.length" class="form-hint form-hint--warning">
+          Primero debes registrar al menos un doctor.
+        </p>
+
+        <div class="form-actions">
+          <button class="button button--primary" type="submit" :disabled="guardando || !formularioValido">
+            {{ guardando ? "Gardando..." : editando ? "Gardar cambios" : "Gardar" }}
+          </button>
+          <button class="button button--secondary" type="button" @click="limpiarFormulario">
+            {{ editando ? "Cancelar edición" : "Limpar" }}
+          </button>
         </div>
-        <div class="campo campo-estado">
-          <select
-            v-model="novaCita.estado"
-            aria-label="Estado da cita"
-            :class="{ 'campo-vacio': !novaCita.estado }"
-            required
-          >
-            <option value="">Estado da cita</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="Confirmada">Confirmada</option>
-            <option value="Cancelada">Cancelada</option>
-          </select>
-        </div>
-      </div>
+      </form>
+    </div>
 
-      <textarea
-        v-model="novaCita.observacions"
-        placeholder="Observacións adicionais"
-        aria-label="Observacións adicionais"
-        rows="3"
-      ></textarea>
-
-      <button type="submit" class="btn-guardar">Gardar</button>
-    </form>
-
-    <p v-if="mensaxeErro" class="mensaxe-erro">{{ mensaxeErro }}</p>
-
-    <div class="listaxe-cabecera">
-      <h4>📋 Listaxe de Citas</h4>
+    <div class="section-title section-title--list">
+      <h2>📋 Listado de citas</h2>
       <button
+        class="refresh-button"
         type="button"
-        class="btn-buscar"
-        title="Actualizar listaxe"
-        aria-label="Actualizar listaxe"
-        @click="mostrarListaxe = true"
+        title="Actualizar listado"
+        aria-label="Actualizar listado"
+        :disabled="cargando"
+        @click="cargarDatos"
       >
-        ⟳
+        ↻
       </button>
     </div>
 
-    <table v-if="mostrarListaxe && citas.length > 0">
-      <thead>
-        <tr>
-          <th>ID cita</th>
-          <th>Data</th>
-          <th>Paciente</th>
-          <th>Doctor</th>
-          <th>Hora</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="cita in citas" :key="cita.id">
-          <td>{{ cita.id }}</td>
-          <td>{{ cita.data }}</td>
-          <td>{{ cita.idPaciente }}</td>
-          <td>{{ cita.idDoctor }}</td>
-          <td>{{ cita.hora }}</td>
-          <td>{{ cita.estado }}</td>
-          <td><button type="button" @click="borrarCita(cita.id)">🗑️</button></td>
-        </tr>
-      </tbody>
-    </table>
-    <p v-else>Non hai citas cargadas ou falla a conexión coa BBDD.</p>
-    <button v-if="citas.length" type="button" class="btn-pdf" @click="descargarInforme">
-      Descargar informe PDF
-    </button>
-  </div>
+    <p v-if="errorCarga" class="form-hint form-hint--warning">{{ errorCarga }}</p>
+    <p v-if="cargando" class="empty-state">Cargando citas...</p>
+    <div v-else-if="citas.length" class="appointments-table-wrapper">
+      <table class="appointments-table">
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Paciente</th>
+            <th>Doctor</th>
+            <th>Motivo</th>
+            <th>Estado</th>
+            <th>Observaciones</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in citas" :key="item._id">
+            <td>{{ item.fecha }} · {{ item.hora }}</td>
+            <td>{{ nombrePaciente(item.pacienteId) }}</td>
+            <td>{{ nombreDoctor(item.doctorId) }}</td>
+            <td>{{ item.motivo }}</td>
+            <td><span class="status-badge" :class="`status-badge--${item.estado}`">{{ etiquetaEstado(item.estado) }}</span></td>
+            <td>{{ item.observacions || "—" }}</td>
+            <td class="actions-cell">
+              <button type="button" title="Editar cita" @click="editarCita(item)">✏️</button>
+              <button type="button" title="Eliminar cita" @click="eliminarCita(item)">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p v-else class="empty-state">No hay citas registradas en la colección citas.</p>
+  </section>
 </template>
 
 <script setup>
-// reactive guarda el formulario; ref guarda la lista y los mensajes.
-import { onMounted, reactive, ref } from "vue";
-import { deleteCita, getCitas, saveCita } from "../api/citas.js";
-import { alertaError, alertaExito } from "../utils/alertas.js";
-import jsPDF from "jspdf";
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
+import { usePacienteStore } from "../store/pacienteStore.js"
+import { useDoctorStore } from "../store/doctorStore.js"
+import { deleteCita, getCitas, saveCita, updateCita } from "../api/citas.js"
+import { getDoctores } from "../api/doctores.js"
+import { getPacientes } from "../api/pacientes.js"
+import { alertaConfirmacion, alertaError, alertaExito } from "../utils/alertas.js"
 
-const citas = ref([]);
-const mostrarListaxe = ref(true);
-const mensaxeErro = ref("");
+const pacienteStore = usePacienteStore()
+const doctorStore = useDoctorStore()
+const citas = ref([])
+const pacientes = ref([])
+const doctores = ref([])
+const cargando = ref(false)
+const guardando = ref(false)
+const editando = ref(false)
+const errorCarga = ref("")
+let actualizacionAutomatica
 
-async function cargarCitas() {
-  try {
-    citas.value = await getCitas();
-    mensaxeErro.value = "";
-  } catch (error) {
-    console.error("Error ao cargar citas:", error);
-    mensaxeErro.value = error.response?.data?.mensaje ||
-      "Non se puideron cargar as citas. Comproba que o backend estea iniciado.";
-  }
-}
-
-onMounted(async () => {
-  await cargarCitas();
-});
-
-const novaCita = reactive({
-  id: "",
-  data: "",
-  idPaciente: "",
-  idDoctor: "",
+const citaVacia = () => ({
+  _id: "",
+  pacienteId: "",
+  doctorId: "",
+  fecha: "",
   hora: "",
   motivo: "",
-  estado: "",
   observacions: "",
-});
+  estado: "pendente"
+})
+const cita = reactive(citaVacia())
 
-async function gardarCita() {
-  const cita = { ...novaCita };
+const formularioValido = computed(() => Boolean(
+  cita.fecha &&
+  cita.hora &&
+  cita.pacienteId &&
+  cita.doctorId &&
+  cita.motivo.trim() &&
+  cita.estado
+))
+
+const nombrePacienteFormulario = computed(() => {
+  if (!cita.pacienteId) return "Selecciona un paciente desde su pestaña"
+  const paciente = pacientes.value.find((item) => String(item._id) === idRelacionado(cita.pacienteId))
+  return paciente
+    ? `${paciente.nomepac} ${paciente.apelpac}`
+    : `${pacienteStore.nomepac || ""} ${pacienteStore.apelpac || ""}`.trim() || "Paciente seleccionado"
+})
+
+const nombreDoctorFormulario = computed(() => {
+  if (!cita.doctorId) return "Selecciona un doctor desde su pestaña"
+  const doctor = doctores.value.find((item) => String(item._id) === idRelacionado(cita.doctorId))
+  return doctor
+    ? `${doctor.nomedoc} ${doctor.apeldoc}`
+    : `${doctorStore.nomedoc || ""} ${doctorStore.apeldoc || ""}`.trim() || "Doctor seleccionado"
+})
+
+onMounted(async () => {
+  await cargarDatos()
+  // REST no mantiene una suscripción; este refresco mantiene la lista sincronizada.
+  actualizacionAutomatica = window.setInterval(cargarDatos, 10000)
+})
+
+watch(
+  () => [pacienteStore.idPaciente, doctorStore.idDoctor],
+  ([idPaciente, idDoctor]) => {
+    if (!editando.value) {
+      cita.pacienteId = idPaciente || ""
+      cita.doctorId = idDoctor || ""
+    }
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  if (actualizacionAutomatica) {
+    window.clearInterval(actualizacionAutomatica)
+  }
+})
+
+async function cargarDatos() {
+  if (cargando.value) return
+  cargando.value = true
+  errorCarga.value = ""
+
   try {
-    const citaGardada = await saveCita(cita);
-    citas.value.push(citaGardada);
-    mensaxeErro.value = "";
-    limparFormulario();
-    await alertaExito("A cita gardouse correctamente.");
+    const [listaCitas, listaPacientes, listaDoctores] = await Promise.all([
+      getCitas(),
+      getPacientes(),
+      getDoctores()
+    ])
+    citas.value = listaCitas
+    pacientes.value = listaPacientes
+    doctores.value = listaDoctores
   } catch (error) {
-    console.error("Error ao gardar cita:", error);
-    mensaxeErro.value = error.response?.data?.mensaje || "Non se puido gardar a cita.";
-    await alertaError(mensaxeErro.value);
+    errorCarga.value = mensajeError(error, "No se pudieron cargar las citas.")
+    alertaError(errorCarga.value)
+  } finally {
+    cargando.value = false
   }
 }
 
-async function borrarCita(id) {
+async function guardarCita() {
+  if (!formularioValido.value) return
+  guardando.value = true
+  const datosCita = {
+    pacienteId: cita.pacienteId,
+    doctorId: cita.doctorId,
+    fecha: cita.fecha,
+    hora: cita.hora,
+    motivo: cita.motivo.trim(),
+    observacions: cita.observacions.trim(),
+    estado: cita.estado
+  }
+
   try {
-    await deleteCita(id);
-    citas.value = citas.value.filter((cita) => cita.id !== id);
-    await alertaExito("A cita eliminouse correctamente.");
+    if (editando.value) {
+      await updateCita(cita._id, datosCita)
+    } else {
+      await saveCita(datosCita)
+    }
+    await alertaExito(editando.value ? "La cita se ha actualizado correctamente." : "La cita se ha guardado correctamente.")
+    limpiarFormulario()
+    await cargarDatos()
   } catch (error) {
-    console.error("Error ao eliminar cita:", error);
-    await alertaError("Non se puido eliminar a cita.");
+    alertaError(mensajeError(error, "No se pudo guardar la cita."))
+  } finally {
+    guardando.value = false
   }
 }
 
-function limparFormulario() {
-  // Restablece el formulario para poder introducir otra cita.
-  Object.assign(novaCita, {
-    id: "",
-    data: "",
-    idPaciente: "",
-    idDoctor: "",
-    hora: "",
-    motivo: "",
-    estado: "",
-    observacions: "",
-  });
+function editarCita(item) {
+  Object.assign(cita, citaVacia(), item, { observacions: item.observacions ?? "" })
+  editando.value = true
 }
 
-function descargarInforme() {
-  const documento = new jsPDF();
-  documento.text("Informe de citas", 20, 20);
-  citas.value.forEach((cita, index) => {
-    documento.text(
-      `${cita.data} ${cita.hora} - Paciente: ${cita.idPaciente} - Doctor: ${cita.idDoctor} - ${cita.estado}`,
-      20,
-      35 + index * 8,
-    );
-  });
-  documento.save("informe-citas.pdf");
+async function eliminarCita(item) {
+  const confirmacion = await alertaConfirmacion(`¿Eliminar la cita del ${item.fecha} a las ${item.hora}?`, "Eliminar cita")
+  if (!confirmacion.isConfirmed) return
+  try {
+    await deleteCita(item._id)
+    if (cita._id === item._id) limpiarFormulario()
+    await alertaExito("La cita se ha eliminado correctamente.")
+    await cargarDatos()
+  } catch (error) {
+    alertaError(mensajeError(error, "No se pudo eliminar la cita."))
+  }
+}
+
+function limpiarFormulario() {
+  Object.assign(cita, citaVacia())
+  editando.value = false
+}
+
+function idRelacionado(relacion) {
+  return String(relacion?._id ?? relacion ?? "")
+}
+
+function nombrePaciente(pacienteId) {
+  const paciente = pacientes.value.find((item) => String(item._id) === idRelacionado(pacienteId))
+  return paciente ? `${paciente.nomepac} ${paciente.apelpac}` : "Paciente no disponible"
+}
+
+function nombreDoctor(doctorId) {
+  const doctor = doctores.value.find((item) => String(item._id) === idRelacionado(doctorId))
+  return doctor ? `${doctor.nomedoc} ${doctor.apeldoc}` : "Doctor no disponible"
+}
+
+function etiquetaEstado(estado) {
+  return {
+    pendente: "Pendiente",
+    confirmada: "Confirmada",
+    realizada: "Realizada",
+    cancelada: "Cancelada"
+  }[estado] ?? estado
+}
+
+function mensajeError(error, porDefecto) {
+  return error.response?.data?.mensaje ||
+    error.response?.data?.message ||
+    error.message ||
+    porDefecto
 }
 </script>
 
 <style scoped>
-.xestion-pacientes {
-  width: 100%;
-  background: white;
+.appointment-page {
   padding: 2rem;
-  overflow: visible;
-  border-radius: 2px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
+  background: #fff;
+  color: #233238;
 }
 
-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.fila {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  width: 100%;
-  min-width: 0;
-}
-
-.campo {
+.section-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.campo input,
-textarea,
-.campo select {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  padding: 0.65rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font: inherit;
-  font-size: 0.9rem;
-  background-color: #fff;
-  color: #000;
-  -webkit-text-fill-color: #000;
-}
-
-.campo-id-cita input::placeholder,
-.campo-paciente input::placeholder,
-.campo-doctor input::placeholder,
-.campo-motivo input::placeholder,
-textarea::placeholder {
-  color: #6b6375 !important;
-  -webkit-text-fill-color: #6b6375 !important;
-  opacity: 1 !important;
-}
-
-.campo-id-cita {
-  flex: 0 1 165px;
-}
-
-.campo-id-cita input {
-  text-align: center;
-}
-
-.texto-centrado {
-  text-align: center;
-}
-
-.campo-data input.campo-vacio,
-.campo-hora input.campo-vacio {
-  color: #6b6375;
-  -webkit-text-fill-color: #6b6375;
-}
-
-.campo select.campo-vacio {
-  color: #6b6375;
-  -webkit-text-fill-color: #6b6375;
-}
-
-.campo-data {
-  flex: 0 1 175px;
-}
-
-.campo-paciente,
-.campo-doctor {
-  flex: 1 1 300px;
-}
-
-.campo-hora {
-  flex: 0 1 100px;
-}
-
-.campo-hora label {
-  white-space: nowrap;
-  color: #6b6375;
-}
-
-.campo-hora input[type="time"]::-webkit-calendar-picker-indicator {
-  filter: brightness(0);
-  opacity: 1;
-}
-
-.campo-data input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: brightness(0);
-  opacity: 1;
-}
-
-.campo-motivo,
-.campo-estado {
-  flex: 1 1 250px;
-}
-
-textarea {
-  display: block;
-  resize: vertical;
-  min-height: 72px;
-}
-
-.btn-accion,
-.btn-buscar {
-  background: #f3f3f3;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  min-width: 38px;
-}
-
-.btn-guardar {
-  background-color: #fff;
-  color: #009900;
-  border: 2px solid #009900;
-  padding: 0.5rem 1.7rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  margin: 0 auto;
-  display: block;
-}
-
-.btn-guardar:hover {
-  background-color: #009900;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 3rem;
+  margin-bottom: 1.25rem;
+  padding: 0.65rem 1rem;
+  background: #004800;
   color: #fff;
 }
 
-.btn-guardar:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.section-title h1,
+.section-title h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
 }
 
-.mensaxe-erro {
-  color: #b42323;
-  margin-bottom: 1rem;
-  text-align: center;
+.section-title__status {
+  font-size: 0.75rem;
+  opacity: 0.9;
 }
 
-.listaxe-cabecera {
-  display: flex;
-  align-items: center;
+.appointment-layout {
+  width: 100%;
+}
+
+.appointment-form {
+  min-width: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.listaxe-cabecera h4 {
-  flex: 1;
+.form-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.84rem;
+  font-weight: 600;
 }
 
-table {
+.form-field--wide {
+  grid-column: 1 / -1;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  box-sizing: border-box;
   width: 100%;
-  border-collapse: separate;
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  border: 1px solid #ddd;
+  border: 1px solid #c8d8c8;
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  background: #fff;
+  color: #233238;
+  font: inherit;
+  font-weight: 400;
+  outline: none;
 }
 
-th,
-td {
-  border: 1px solid #ddd;
+.form-field textarea {
+  resize: vertical;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: #009900;
+  box-shadow: 0 0 0 3px #00990026;
+}
+
+.form-field input:disabled,
+.form-field select:disabled {
+  background: #f1f6f4;
+  color: #6d7f7b;
+}
+
+.form-field__placeholder {
+  color: #8a9995 !important;
+  font-style: italic;
+}
+
+.form-hint {
+  margin: 1rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.5rem;
+  background: #eef8ee;
+  color: #286b28;
+  font-size: 0.82rem;
+}
+
+.form-hint--warning {
+  background: #fff7e6;
+  color: #9a6a13;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.button {
+  border: 0;
+  border-radius: 0.6rem;
+  padding: 0.65rem 1.5rem;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.button--primary {
+  background: #004800;
+  color: #fff;
+}
+
+.button--primary:disabled {
+  background: #64748b;
+  opacity: 0.65;
+}
+
+.button--primary:hover:not(:disabled) {
+  background: #007a00;
+}
+
+.button--secondary {
+  border: 1px solid #c8d8c8;
+  background: #f5f8f7;
+  color: #52635f;
+}
+
+.section-title--list {
+  justify-content: space-between;
+  margin-top: 1.75rem;
+  margin-bottom: 0;
+}
+
+.refresh-button {
+  border: 1px solid #fff;
+  border-radius: 0.4rem;
+  background: #fff;
+  color: #004800;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.refresh-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.appointments-table-wrapper {
+  overflow-x: auto;
+}
+
+.appointments-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+
+.appointments-table th,
+.appointments-table td {
+  border: 1px solid #cfd9cf;
   padding: 0.7rem;
   text-align: left;
+  vertical-align: middle;
 }
 
-th {
+.appointments-table th {
+  background: #eef5ee;
+  color: #40514c;
+}
+
+.status-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  background: #eef1f0;
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.status-badge--confirmada {
+  background: #d9f2d9;
+  color: #006400;
+}
+
+.status-badge--cancelada {
+  background: #fde8e8;
+  color: #a13d3d;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+.actions-cell button {
+  border: 0;
+  border-radius: 0.35rem;
+  padding: 0.3rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.actions-cell button:hover {
+  background: #edf4f1;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 1.5rem;
+  color: #71817d;
   text-align: center;
-  background-color: #f8f9fa;
 }
 
-h4 {
-  margin: 0 0 1rem;
-  padding: 0.6rem 0.8rem;
-  font-weight: 600;
-  background-color: #009900;
-  color: white;
-  border-radius: 4px;
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field--wide {
+    grid-column: auto;
+  }
 }
 
-@media (max-width: 768px) {
-  .xestion-pacientes {
+@media (max-width: 600px) {
+  .appointment-page {
     padding: 1rem;
   }
 
-  .fila {
-    flex-direction: column;
-    gap: 0.5rem;
+  .section-title {
+    justify-content: space-between;
   }
 
-  .campo,
-  .campo-id-cita,
-  .campo-data,
-  .campo-paciente,
-  .campo-doctor,
-  .campo-hora,
-  .campo-motivo,
-  .campo-estado {
-    flex: 1 1 auto;
-    width: 100%;
-  }
-
-  .btn-accion {
-    align-self: flex-start;
+  .section-title__status {
+    display: none;
   }
 }
 </style>
+

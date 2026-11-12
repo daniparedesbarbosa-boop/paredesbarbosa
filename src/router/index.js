@@ -12,12 +12,12 @@ import Citas from "../components/Citas.vue";
 const routes = [
   // Página inicial y pantallas principales de gestión.
   { path: "/", name: "inicio", component: IniCio },
-  { path: "/pacientes", name: "pacientes", component: XestionPacientes },
-  { path: "/doctores", name: "doctores", component: XestionDoctores },
-  { path: "/citas", name: "citas", component: Citas },
+  { path: "/pacientes", alias: "/xestion-pacientes", name: "pacientes", component: XestionPacientes },
+  { path: "/doctores", alias: "/xestion-doctores", name: "doctores", component: XestionDoctores },
+  { path: "/citas", alias: "/xestion-citas", name: "citas", component: Citas },
   { path: "/sobrenos", name: "sobrenos", component: SobreNos },
   { path: "/avisolegal", name: "avisolegal", component: AvisoLegal },
-  { path: "/politica-privacidad", name: "PoliticaPrivacidad", component: PoliticaPrivacidad },
+  { path: "/politica-privacidad", name: "politica-privacidad", component: PoliticaPrivacidad },
   { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound },
 ];
 

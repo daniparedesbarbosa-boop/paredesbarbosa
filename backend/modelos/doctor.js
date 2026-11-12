@@ -1,20 +1,19 @@
-//Modelo doctor
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const doctorSchema = new mongoose.Schema(
-  {
-    iddoc: { type: String, required: true, unique: true },
-    nomedoc: { type: String, required: true },
-    apeldoc: { type: String, required: true },
-    coledoc: { type: String, required: true },
-    movildoc: { type: String, required: true },
-    maildoc: { type: String, required: false },
-    espedoc: { type: String, required: true },
-  },
+// Esquema de los datos persistidos para cada doctor.
+const DoctorSchema = new mongoose.Schema(
+    {
+    nomedoc: {type: String, required: true},
+    apeldoc: {type: String, required: true},
+    coledoc: {type: String, required: true},
+    maildoc: {type: String, required: false},
+    movildoc: {type: String, required: true},
+    espedoc: {type: String, required: true},
 
-  {
-    collection: "doctores",
-  },
+    },
+    {
+    collection: "doctores"
+    }
 );
 
-export default mongoose.model("doctor", doctorSchema);
+export default mongoose.model('Doctor', DoctorSchema);

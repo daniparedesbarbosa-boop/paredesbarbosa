@@ -1,87 +1,98 @@
 <template>
-  <!-- Pantalla CRUD de doctores: el formulario escribe en la API y la tabla lee su resultado. -->
-  <div class="xestion-doctores">
-    <h4>🩺 Xestión de doctores</h4>
-    <form @submit.prevent="gardarDoctor">
-      <div class="fila">
-        <div class="campo campo-id">
-          <div class="id-control">
-            <input v-model="novoDoctor.iddoc" type="text" placeholder="ID automático" aria-label="ID do doctor" disabled />
-            <button
-              type="button"
-              @click="limpiaFormdoc"
-              style="font-size: 20px"
-            >
-              🧹
-            </button>
+  <div class="w-full overflow-visible bg-white p-8 shadow-md max-md:p-4 [&_form]:mb-8 [&_form]:flex [&_form]:w-full [&_form]:flex-col [&_form]:gap-4 [&_.campo]:flex [&_.campo]:flex-1 [&_.campo]:items-center [&_.campo]:gap-2 [&_.campo_label]:min-w-20 [&_.id-wrapper]:flex [&_.id-wrapper]:w-full [&_input]:box-border [&_input]:flex-1 [&_input]:rounded-md [&_input]:border [&_input]:border-slate-300 [&_input]:p-2 [&_input]:outline-none [&_input]:focus:border-blue-500 [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-slate-300 [&_select]:p-2 [&_table]:mt-4 [&_table]:w-full [&_table]:border-collapse [&_table]:border [&_table]:border-slate-300 [&_th]:border [&_th]:border-slate-300 [&_th]:bg-slate-50 [&_th]:p-3 [&_td]:border [&_td]:border-slate-300 [&_td]:p-3">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3 bg-[#009900] px-4 py-3">
+      <h4 class="font-semibold text-white">👥 Xestión de doctores</h4>
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#004800] shadow-sm transition hover:bg-[#eef8ee] disabled:cursor-not-allowed disabled:opacity-60"
+        :disabled="doctores.length === 0"
+        @click="exportarDoctores"
+      >
+        📄 Exportar PDF
+      </button>
+    </div>
+    <!-- El submit llama a guardarDoctor(); editando determina si crea o modifica. -->
+    <form @submit.prevent="guardarDoctor">
+      <div class="flex w-full flex-col gap-2 md:flex-row md:gap-4">
+        <div class="flex flex-1 items-center gap-2">
+          <label>ID</label>
+          <div class="id-wrapper">
+            <input
+              v-model="novoDoctor._id"
+              type="text"
+              disabled
+              class="text-center"
+            />
           </div>
         </div>
-        <div class="campo campo-nome">
+        <div class="flex-[4] items-center gap-2 md:flex">
+          <label>Nome:</label>
           <input
-            id="nome"
             v-model="novoDoctor.nomedoc"
             type="text"
-            placeholder="Nome"
-            aria-label="Nome"
             required
-            @blur="normalizarNome('nomedoc')"
+            @input="capitalizarNombre"
           />
         </div>
-        <div class="campo campo-apelidos">
+        <div class="flex-[4] items-center gap-2 md:flex">
+          <label>Apelidos:</label>
           <input
-            id="apellido"
             v-model="novoDoctor.apeldoc"
             type="text"
-            placeholder="Apelidos"
-            aria-label="Apelidos"
             required
-            @blur="normalizarNome('apeldoc')"
+            @input="capitalizarApellidos"
           />
         </div>
       </div>
-      <div class="fila">
-        
-        <div class="campo movil">
+      <div class="flex w-full flex-col gap-2 md:flex-row md:gap-4">
+        <div class="flex-1 items-center gap-2 md:flex">
+          <label>Movil:</label>
           <input
             v-model="novoDoctor.movildoc"
             type="tel"
-            placeholder="Móbil"
-            aria-label="Móbil"
-            size="20"
             required
-            pattern="[67][0-9]{8}"
-            @input="mobilComprobado = false"
-            @blur="comprobarMobil"
-            :class="{ 'mobil-invalido': mobilComprobado && mobilInvalido }"
-            :aria-invalid="mobilComprobado && mobilInvalido"
+            inputmode="numeric"
+            class="text-center"
+            :class="{ 'border-2 border-red-500 shadow-[0_0_0_1px_rgba(220,53,69,0.15)]': movilInvalido }"
+            @input="validarMovilEnEntrada"
+            @blur="borrarMovilSeInvalido"
           />
         </div>
-        <div class="campo campo-correo">
+        <div class="flex-[2] items-center gap-2 md:flex">
+          <label>Correo:</label>
           <input
             v-model="novoDoctor.maildoc"
             type="email"
-            placeholder="Correo electrónico"
-            aria-label="Correo electrónico"
-            required
-            @input="correoComprobado = false"
-            @blur="comprobarCorreo"
-            :class="{ 'correo-invalido': correoComprobado && correoInvalido }"
-            :aria-invalid="correoComprobado && correoInvalido"
+            :class="{ 'border-2 border-red-500 shadow-[0_0_0_1px_rgba(220,53,69,0.15)]': correoInvalido }"
+            @blur="borrarCorreoSeInvalido"
           />
         </div>
-
-        <div class="campo especialidad">
-          <select
-            id="especialidade"
-            v-model="novoDoctor.espedoc"
-            aria-label="Especialidad"
-            :class="{ 'campo-vacio': !novoDoctor.espedoc }"
-            required
-          >
-            <option value="">Selecciona una especialidad:</option>
+      </div>
+      <div class="flex w-full flex-col gap-2 md:flex-row md:gap-4">
+        <div class="flex flex-1 items-center gap-2">
+          <label class="campo-label">¿Es colegiado?</label>
+          <label>
+            <input
+              v-model="novoDoctor.coledoc"
+              type="radio"
+              name="colegiado"
+              value="si"
+              required
+            />
+            Sí
+          </label>
+          <label>
+            <input v-model="novoDoctor.coledoc" type="radio" name="colegiado" value="no" />
+            No
+          </label>
+        </div>
+        <div class="flex-1 items-center gap-2 md:flex">
+          <label>Especialidad:</label>
+          <select v-model="novoDoctor.espedoc" required>
+            <option value="" disabled>Selecciona unha especialidad</option>
             <option
-              v-for="especialidad in especialidades"
-              :key="especialidad.id"
+              v-for="(especialidad, index) in especialidades"
+              :key="index"
               :value="especialidad.nm"
             >
               {{ especialidad.nm }}
@@ -89,74 +100,37 @@
           </select>
         </div>
       </div>
-
-      <div class="fila fila-colegiado">
-        <div class="campo colegiado">
-          <label>Colegiado:</label>
-          <label>
-            <input
-              v-model="novoDoctor.coledoc"
-              type="radio"
-              name="colegiado"
-              value="Si"
-              required
-            />
-            Si
-          </label>
-          <label>
-            <input
-              v-model="novoDoctor.coledoc"
-              type="radio"
-              name="colegiado"
-              value="No"
-            />
-            No
-          </label>
-        </div>
-      </div>
-
-      <div class="botones-formulario">
+      <div class="flex justify-center gap-3">
         <button
           type="submit"
-          class="btn-guardar"
+          class="rounded-lg border-0 bg-[#009900] px-6 py-2 font-bold text-white transition hover:bg-[#007a00] disabled:cursor-not-allowed disabled:bg-slate-500 disabled:opacity-65"
           :disabled="
             novoDoctor.nomedoc === '' ||
             novoDoctor.apeldoc === '' ||
-            novoDoctor.coledoc === '' ||
             novoDoctor.movildoc === '' ||
-            novoDoctor.maildoc === '' ||
-            guardando ||
-            mobilInvalido ||
-            correoInvalido
+            novoDoctor.coledoc === '' ||
+            novoDoctor.espedoc === ''
           "
         >
           Gardar
         </button>
         <button
           type="button"
-          class="btn-pdf"
-          @click="descargarInforme"
-          title="Descargar lista de doctores en PDF"
-          aria-label="Descargar lista de doctores en PDF"
+          class="rounded-lg border border-slate-300 bg-slate-100 px-6 py-2 text-slate-700 transition hover:bg-slate-200"
+          @click="limpiaFormdoc"
         >
-          🖨️
+          Limpar
         </button>
       </div>
     </form>
-    <p v-if="mensaxeErro" class="mensaxe-erro">{{ mensaxeErro }}</p>
-    <div class="listaxe-cabecera">
-      <h4>📋 Listaxe de doctores</h4>
-      <button type="button" class="btn-buscar" @click="cargarDoctores" title="Actualizar listaxe">
-        ⟳
-      </button>
-    </div>
+    <h4 class="mb-4 bg-[#009900] font-semibold text-white">📋 Listaxe de docotres</h4>
     <table v-if="doctores.length > 0">
       <thead>
         <tr>
+          <th>#</th>
           <th>ID</th>
-          <th>Código</th>
-          <th>Apelidos</th>
           <th>Nome</th>
+          <th>Apelidos</th>
           <th>Movil</th>
           <th>Especialidad</th>
           <th>Accións</th>
@@ -164,13 +138,14 @@
       </thead>
       <tbody>
         <tr v-for="(u, index) in doctores" :key="index">
-          <td style="text-align: center;">{{ index + 1 }}</td>
-          <td style="text-align: center">{{ u.iddoc }}</td>
-          <td>{{ u.apeldoc }}</td>
+          <td class="text-center">{{ index + 1 }}</td>
+          <td class="text-center">{{ u._id }}</td>
           <td>{{ u.nomedoc }}</td>
+          <td>{{ u.apeldoc }}</td>
           <td>{{ u.movildoc }}</td>
-          <td style="text-align: center">{{ u.espedoc }}</td>
-          <td style="text-align: center">
+          <td class="text-center">{{ u.espedoc }}</td>
+          <td class="text-center">
+            <button @click="seleccionarDoctor(u)" title="Seleccionar para una cita">📅</button>
             <button @click="editarDoctor(index)" title="Editar">✏️</button>
             <button @click="eliminarDoctor(index)" title="Eliminar">🗑️</button>
           </td>
@@ -178,501 +153,191 @@
       </tbody>
     </table>
 
-    <p v-else>Non hai doctores cargados.</p>
+    <p v-else>Non hai usuarios cargados.</p>
   </div>
 </template>
 
 <script setup>
-// ref/reactive mantienen el estado que usa la plantilla; onMounted carga datos al entrar.
-import { computed, ref, reactive, onMounted } from "vue";
-// Estas funciones son el puente con Express: Express es quien persiste en MongoDB.
+import { ref, reactive, onMounted, computed } from "vue";
+// Catalogo que alimenta el selector de especialidades.
 import { obtenerEspecialidades } from "../api/especialidades.js";
-import { saveDoctor, getDoctores, getDoctorByEspecialidad, modifyDoctor, deleteDoctor } from "../api/doctores.js";
-import { alertaError, alertaExito } from "../utils/alertas.js";
-import jsPDF from "jspdf";
+// Operaciones HTTP sobre la coleccion de doctores.
+import {
+  saveDoctor,
+  getDoctores,
+  deleteDoctor,
+  modifyDoctor,
+} from "../api/doctores.js";
+// Dialogos reutilizables para confirmar acciones y comunicar resultados.
+import {
+  alertaConfirmacion,
+  alertaError,
+  alertaExito,
+} from "../utils/alertas.js";
+import { generarPDF } from "../utils/pdf.js";
+import { useDoctorStore } from "../store/doctorStore.js";
 
-// Lista visible y datos auxiliares del formulario.
+// Listas reactivas usadas por la tabla y los selectores de la pantalla.
 const doctores = ref([]);
 const especialidades = ref([]);
-const mobilComprobado = ref(false);
-const correoComprobado = ref(false);
-const guardando = ref(false);
-const mensaxeErro = ref("");
-const editando = ref(false);
 const novoDoctor = reactive({
-  iddoc: "",
+  _id: "",
   nomedoc: "",
   apeldoc: "",
-  maildoc: "",
-  movildoc: "",
   coledoc: "",
+  movildoc: "",
+  maildoc: "",
   espedoc: "",
 });
+// Indica si el submit debe crear un doctor o actualizar el seleccionado.
+const editando = ref(false);
+const doctorStore = useDoctorStore();
 
-const mobilInvalido = computed(() => {
-  return (
-    novoDoctor.movildoc !== "" &&
-    !/^[67]\d{8}$/.test(novoDoctor.movildoc)
+// Guarda en Pinia el doctor que se usara para consultar sus citas.
+function seleccionarDoctor(doctor) {
+  doctorStore.seleccionarDoctor(doctor);
+}
+
+function exportarDoctores() {
+  generarPDF(
+    "Listado de doctores",
+    ["ID", "Apellidos", "Nombre", "Móvil", "Especialidad"],
+    doctores.value.map((doctor) => [
+      doctor._id,
+      doctor.apeldoc,
+      doctor.nomedoc,
+      doctor.movildoc,
+      doctor.espedoc,
+    ]),
+    "listado_doctores.pdf",
   );
+}
+
+// Carga los doctores y las especialidades cuando Vue termina de montar la pantalla.
+onMounted(async () => {
+  try {
+    [doctores.value, especialidades.value] = await Promise.all([
+      getDoctores(),
+      obtenerEspecialidades(),
+    ]);
+  } catch (error) {
+    console.error("Error al cargar los doctores y especialidades:", error);
+    await alertaError("No se pudieron cargar los datos.");
+  }
+});
+
+const movilInvalido = computed(() => {
+  const valor = novoDoctor.movildoc.trim();
+  return valor !== "" && !/^[67]\d{8}$/.test(valor);
 });
 
 const correoInvalido = computed(() => {
-  return (
-    novoDoctor.maildoc !== "" &&
-    !/^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+)*@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i.test(
-      novoDoctor.maildoc,
-    )
-  );
+  const valor = novoDoctor.maildoc.trim();
+  return valor !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
 });
 
-async function cargarDoctores() {
-  try {
-    doctores.value = await getDoctores();
-  } catch (error) {
-    console.error("Error ao cargar doctores:", error);
-    mensaxeErro.value = error.response?.data?.mensaje ||
-      "Non se puideron cargar os doctores. Comproba que o backend estea iniciado.";
-  }
+function capitalizarNombre(event) {
+  const valor = event.target.value;
+  const formatado = valor
+    .toLowerCase()
+    .replace(/(^|\s)[\p{L}]/gu, (letra) => letra.toUpperCase());
+  novoDoctor.nomedoc = formatado;
 }
 
-// Al abrir la pantalla se cargan doctores y especialidades desde el backend.
-onMounted(async () => {
-  await cargarDoctores();
-  try {
-    especialidades.value = await obtenerEspecialidades();
-  } catch (error) {
-    console.error("Error ao cargar especialidades:", error);
-    mensaxeErro.value =
-      "Non se puideron cargar as especialidades. Comproba a conexión co servidor.";
-  }
-});
+function capitalizarApellidos(event) {
+  const valor = event.target.value;
+  const formatado = valor
+    .toLowerCase()
+    .replace(/(^|\s)[\p{L}]/gu, (letra) => letra.toUpperCase());
+  novoDoctor.apeldoc = formatado;
+}
 
-function descargarInforme() {
-  if (doctores.value.length === 0) {
-    mensaxeErro.value = "Non hai doctores cargados para crear o informe.";
+function validarMovilEnEntrada() {
+  novoDoctor.movildoc = novoDoctor.movildoc.replace(/\D/g, "");
+}
+
+function borrarMovilSeInvalido() {
+  if (movilInvalido.value) novoDoctor.movildoc = "";
+}
+
+function borrarCorreoSeInvalido() {
+  if (correoInvalido.value) novoDoctor.maildoc = "";
+}
+
+// Valida, confirma y crea o actualiza el doctor segun el modo actual del formulario.
+async function guardarDoctor() {
+  if (movilInvalido.value || correoInvalido.value) {
+    await alertaError("Revisa el móvil y el correo electrónico.", "Datos no válidos");
     return;
   }
 
-  const documento = new jsPDF();
-  documento.setFontSize(16);
-  documento.text("Lista de doctores", 20, 20);
-  documento.setFontSize(10);
-  let y = 32;
+  const estabaEditando = editando.value;
+  // La peticion solo se envia despues de que el usuario confirme la operacion.
+  const confirmacion = await alertaConfirmacion(
+    estabaEditando ? "¿Quieres guardar los cambios de este doctor?" : "¿Quieres guardar este doctor?",
+    estabaEditando ? "Confirmar cambios" : "Confirmar alta",
+  );
+  if (!confirmacion.isConfirmed) return;
 
-  doctores.value.forEach((doctor, index) => {
-    const linea = `${index + 1}. ${doctor.nomedoc} ${doctor.apeldoc} | ID: ${doctor.iddoc} | ${doctor.espedoc} | ${doctor.movildoc}`;
-    documento.text(linea, 20, y);
-    y += 8;
-    if (y > 280 && index < doctores.value.length - 1) {
-      documento.addPage();
-      y = 20;
-    }
-  });
-
-  documento.save("lista-doctores.pdf");
-}
-
-// Funciones de limpieza y validación ejecutadas por los eventos del formulario.
-
-function normalizarNome(campo) {
-  novoDoctor[campo] = novoDoctor[campo]
-    .trim()
-    .toLowerCase()
-    .replace(/(^|\s)\S/g, (letra) => letra.toUpperCase());
-}
-
-function comprobarMobil() {
-  novoDoctor.movildoc = novoDoctor.movildoc.trim();
-  mobilComprobado.value = true;
-}
-
-function comprobarCorreo() {
-  novoDoctor.maildoc = novoDoctor.maildoc.trim();
-  correoComprobado.value = true;
-}
-
-function limpiaFormdoc() {
-  Object.assign(novoDoctor, {
-    iddoc: "",
-    nomedoc: "",
-    apeldoc: "",
-    maildoc: "",
-    movildoc: "",
-    coledoc: "",
-    espedoc: "",
-  });
-  mobilComprobado.value = false;
-  correoComprobado.value = false;
-  mensaxeErro.value = "";
-  editando.value = false;
-}
-
-function nuevoIdDoctor() {
-  const numeros = doctores.value
-    .map((doctor) => Number(doctor.iddoc))
-    .filter((id) => Number.isInteger(id));
-  return String((numeros.length ? Math.max(...numeros) : 0) + 1);
-}
-
-async function gardarDoctor() {
-  guardando.value = true;
-  mensaxeErro.value = "";
   try {
-    if (!editando.value) novoDoctor.iddoc = nuevoIdDoctor();
-    const datos = { ...novoDoctor };
-    const doctor = editando.value
-      ? await modifyDoctor(novoDoctor.iddoc, datos)
-      : await saveDoctor(datos);
-    const posicion = doctores.value.findIndex((item) => item.iddoc === doctor.iddoc);
-    if (posicion === -1) doctores.value.push(doctor);
-    else doctores.value[posicion] = doctor;
-    await alertaExito(editando.value ? "Doctor modificado." : "Doctor guardado.");
-    limpiaFormdoc();
-  } catch (error) {
-    console.error("Error ao gardar doctor:", error);
-    mensaxeErro.value = error.response?.data?.mensaje || "Non se puido gardar o doctor.";
-    await alertaError(mensaxeErro.value);
-  } finally {
-    guardando.value = false;
-  }
-}
+    if (editando.value) {
+      const doctorModificado = await modifyDoctor(novoDoctor._id, novoDoctor);
+      const index = doctores.value.findIndex(
+        (doctor) => String(doctor._id) === String(novoDoctor._id)
+      );
 
-function editarDoctor(index) {
-  Object.assign(novoDoctor, doctores.value[index]);
-  editando.value = true;
+      if (index !== -1) doctores.value[index] = doctorModificado;
+    } else {
+      const doctorGuardado = await saveDoctor(novoDoctor);
+      doctores.value.push(doctorGuardado);
+    }
+
+    limpiaFormdoc();
+    await alertaExito(
+      estabaEditando ? "El doctor se actualizó correctamente." : "El doctor se guardó correctamente.",
+    );
+  } catch (error) {
+    console.error("Error al guardar el doctor:", error);
+    await alertaError("No se pudo guardar el doctor.");
+  }
 }
 
 async function eliminarDoctor(index) {
   const doctor = doctores.value[index];
+
   try {
-    await deleteDoctor(doctor.iddoc);
+  // La respuesta determina si se continua o se cancela la eliminacion.
+    const confirmacion = await alertaConfirmacion(
+      `¿Quieres eliminar a ${doctor.nomedoc} ${doctor.apeldoc}?`,
+      "Confirmar eliminación",
+    );
+    if (!confirmacion.isConfirmed) return;
+    await deleteDoctor(doctor._id);
     doctores.value.splice(index, 1);
-    await alertaExito("Doctor eliminado.");
+    await alertaExito("El doctor se eliminó correctamente.");
   } catch (error) {
-    console.error("Error ao eliminar doctor:", error);
-    await alertaError("Non se puido eliminar o doctor.");
+    console.error("Error al eliminar el doctor:", error);
+    await alertaError("No se pudo eliminar el doctor.");
   }
 }
 
+function editarDoctor(index) {
+  const doctor = doctores.value[index];
+  Object.assign(novoDoctor, doctor);
+  seleccionarDoctor(doctor);
+  editando.value = true;
+}
+
+function limpiaFormdoc() {
+  Object.keys(novoDoctor).forEach((key) => {
+    if (typeof novoDoctor[key] === "boolean") {
+      novoDoctor[key] = false;
+    } else {
+      novoDoctor[key] = "";
+    }
+  });
+
+  editando.value = false;
+}
 </script>
 
-<style scoped>
-/* Maquetación del formulario y de la tabla; no cambia la comunicación con la BBDD. */
-.xestion-doctores {
-  width: 100%;
-  /* opcional para que no crezca demasiado en pantallas muy grandes */
-  background: white;
-  padding: 2rem;
-  overflow: visible;
-  border-radius: 2px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-}
-
-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.fila {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  width: 100%;
-  min-width: 0;
-}
-
-.campo {
-  display: flex;
-  align-items: center;
-  /* label e input en la misma línea */
-  gap: 0.5rem;
-  border-radius: 0px;
-  min-width: 0;
-  flex: 1 1 0;
-}
-
-.campo-id {
-  flex: 0 0 auto;
-  min-width: 0;
-  border-radius: 0px;
-}
-
-.id-control {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.id-control input {
-  flex: 0 0 180px;
-  width: 180px;
-  min-width: 180px;
-  text-align: center;
-}
-
-.id-control button {
-  flex: 0 0 auto;
-  padding: 0.25rem 0.45rem;
-}
-
-.campo-nome {
-  flex: 1.5 1 0;
-  border-radius: 0px;
-}
-
-.campo-apelidos {
-  flex: 2 1 0;
-}
-
-.colegiado {
-  flex: 0 0 190px;
-  min-width: 190px;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.fila-colegiado {
-  justify-content: center;
-}
-
-.colegiado input[type="radio"] {
-  flex: 0 0 auto;
-  width: auto;
-  margin: 0;
-  transform: scale(1.35);
-}
-
-.fecha-nacimiento {
-  flex: 1.6 1 0;
-  min-width: 230px;
-}
-
-.campo-correo {
-  flex: 1 1 0;
-  border-radius: 0px;
-}
-
-.campo-correo input.correo-invalido {
-  border-color: #e58b8b;
-  background-color: #fff;
-  color: #000;
-  -webkit-text-fill-color: #000;
-  box-shadow: 0 0 0 2px rgba(229, 139, 139, 0.15);
-}
-
-.movil {
-  flex: 0 0 auto;
-}
-
-.movil input {
-  flex: 0 0 20ch;
-  width: 20ch;
-  text-align: center;
-}
-
-.movil input.mobil-invalido {
-  border-color: #e58b8b;
-  background-color: #fff;
-  color: #000;
-  -webkit-text-fill-color: #000;
-  box-shadow: 0 0 0 2px rgba(229, 139, 139, 0.15);
-}
-
-.campo select {
-  flex: 1;
-  padding: 0.6rem;
-  border: 1px solid #ddd;
-  border-radius: 0px;
-  width: 100%;
-}
-
-.especialidad {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.especialidad select,
-.especialidad option {
-  color: #000;
-  -webkit-text-fill-color: #000;
-}
-
-.especialidad select {
-  color-scheme: light;
-}
-
-.campo-provincia {
-  flex: 1;
-  /* ocupa menos espacio */
-  border-radius: 0px;
-}
-
-.campo-provincia select,
-.campo-provincia option {
-  color: #000;
-}
-
-.campo-municipio select,
-.campo-municipio option {
-  color: #000;
-}
-
-.campo label {
-  min-width: 70px;
-  font-weight: 500;
-  font-size: 0.85rem;
-}
-
-.campo input {
-  flex: 1;
-  padding: 0.65rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-sizing: border-box;
-  min-width: 0;
-  max-width: 100%;
-  font: inherit;
-  font-size: 0.9rem;
-  background-color: #fff;
-  color: #000;
-  -webkit-text-fill-color: #000;
-}
-
-.campo input::placeholder {
-  color: #6b6375;
-  -webkit-text-fill-color: #6b6375;
-  opacity: 1;
-}
-
-.campo select {
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-  font: inherit;
-  font-size: 0.9rem;
-  background-color: #fff;
-  border-radius: 6px;
-}
-
-.campo select.campo-vacio {
-  color: #6b6375;
-  -webkit-text-fill-color: #6b6375;
-}
-
-.fecha-nacimiento input {
-  min-width: 145px;
-}
-
-.btn-guardar {
-  background-color: #fff;
-  color: #009900;
-  border: 2px solid #009900;
-  padding: 0.5rem 1.7rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  margin: 0 auto;
-  display: block;
-}
-
-.botones-formulario {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.botones-formulario .btn-guardar {
-  margin: 0;
-}
-
-.btn-pdf {
-  border: 2px solid #009900;
-  border-radius: 8px;
-  background: #fff;
-  color: #009900;
-  padding: 0.45rem 0.7rem;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-.btn-pdf:hover {
-  background: #009900;
-  color: #fff;
-}
-
-.btn-guardar:hover {
-  background-color: #009900;
-  color: #fff;
-  border-radius: 8px;
-}
-
-.button {
-  background: none;
-  border: 2px solid #ddd;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-table {
-  width: 100%;
-  border-collapse: separate;
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  border: 1px solid #ddd;
-}
-
-th,
-td {
-  border: 1px solid #ddd;
-  padding: 0.7rem;
-  text-align: left;
-}
-
-th {
-  text-align: center;
-  background-color: #f8f9fa;
-}
-
-h4 {
-  margin-bottom: 1rem;
-  font-weight: 600;
-  background-color: #009900;
-  color: white;
-}
-
-@media (max-width: 768px) {
-  .xestion-pacientes {
-    padding: 1rem;
-    /* reducir el padding en pantallas pequeñas */
-  }
-
-  .fila {
-    flex-direction: column;
-    /* apila los campos verticalmente en móviles */
-    gap: 0.5rem;
-    /* opcional: un pequeño espacio entre ellos */
-  }
-
-  .campo-id {
-    flex: 1 1 auto;
-    min-width: 0;
-    width: 100%;
-  }
-
-  .colegiado {
-    flex: 1 1 auto;
-    min-width: 0;
-    width: 100%;
-  }
-
-  .id-control {
-    flex-wrap: wrap;
-  }
-}
-</style>
