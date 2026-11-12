@@ -1,11 +1,14 @@
 <template>
-  <div class="w-full overflow-visible bg-white p-8 shadow-md max-md:p-4 [&_form]:mb-8 [&_form]:flex [&_form]:w-full [&_form]:flex-col [&_form]:gap-4 [&_.campo]:flex [&_.campo]:flex-1 [&_.campo]:items-center [&_.campo]:gap-2 [&_.campo_label]:min-w-20 [&_.dni-wrapper]:flex [&_.dni-wrapper]:w-full [&_.dni-wrapper]:items-center [&_.dni-wrapper]:gap-2 [&_input]:box-border [&_input]:flex-1 [&_input]:rounded-md [&_input]:border [&_input]:border-slate-300 [&_input]:p-2 [&_input]:outline-none [&_input]:focus:border-blue-500 [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-slate-300 [&_select]:p-2 [&_table]:mt-4 [&_table]:w-full [&_table]:border-collapse [&_table]:border [&_table]:border-slate-300 [&_th]:border [&_th]:border-slate-300 [&_th]:bg-slate-50 [&_th]:p-3 [&_td]:border [&_td]:border-slate-300 [&_td]:p-3">
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-3 bg-[#009900] px-4 py-3">
-      <h4 class="font-semibold text-white">👥 Xestión de usuarios</h4>
+  <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-md:p-4 md:p-8 [&_form]:mb-8 [&_form]:flex [&_form]:w-full [&_form]:flex-col [&_form]:gap-5 [&_.campo]:flex [&_.campo]:min-w-0 [&_.campo]:flex-1 [&_.campo]:flex-col [&_.campo]:items-stretch [&_.campo]:gap-2 [&_.campo>label]:text-sm [&_.campo>label]:font-semibold [&_.dni-wrapper]:flex [&_.dni-wrapper]:w-full [&_.dni-wrapper]:flex-wrap [&_.dni-wrapper]:items-center [&_.dni-wrapper]:gap-2 [&_input]:box-border [&_input]:min-h-11 [&_input]:flex-1 [&_input]:rounded-lg [&_input]:border [&_input]:border-slate-300 [&_input]:bg-white [&_input]:p-3 [&_input]:text-slate-800 [&_input]:outline-none [&_input]:transition [&_input]:focus:border-teal-500 [&_input]:focus:ring-4 [&_input]:focus:ring-teal-500/10 [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-lg [&_select]:border [&_select]:border-slate-300 [&_select]:bg-white [&_select]:p-3 [&_select]:text-slate-800 [&_select]:outline-none [&_select]:focus:border-teal-500 [&_table]:mt-4 [&_table]:w-full [&_table]:border-collapse [&_table]:overflow-hidden [&_table]:border [&_table]:border-slate-200 [&_th]:border-b [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-3 [&_th]:text-left [&_th]:text-xs [&_th]:font-bold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-slate-500 [&_td]:border-b [&_td]:border-slate-100 [&_td]:p-3 [&_td]:text-sm [&_td]:text-slate-600 [&_tbody_tr:hover]:bg-teal-50/40">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-teal-50/50 px-5 py-5">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-widest text-teal-700">Gestión clínica</p>
+        <h1 class="mt-1 text-xl font-bold text-slate-900">👥 Pacientes</h1>
+      </div>
         <!-- :disabled impide enviar mientras falten los datos minimos o el consentimiento. -->
       <button
         type="button"
-        class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#004800] shadow-sm transition hover:bg-[#eef8ee] disabled:cursor-not-allowed disabled:opacity-60"
+        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
         :disabled="usuarios.length === 0"
         @click="exportarPacientes"
       >
@@ -13,8 +16,8 @@
       </button>
     </div>
     <form @submit.prevent="modificarPaciente">
-      <div class="flex w-full flex-col gap-2 md:flex-row md:gap-4">
-        <div class="campo campo-dni">
+      <div class="grid w-full grid-cols-1 gap-4 md:grid-cols-[minmax(16rem,1.2fr)_minmax(0,2fr)_minmax(0,2fr)]">
+        <div class="campo campo-dni min-w-0">
           <label>DNI/CIF:</label>
           <div class="dni-wrapper">
             <input
@@ -22,7 +25,7 @@
               v-model="novoPaciente.dnipac"
               type="text"
               required
-              class="text-center"
+              class="!min-w-0 !flex-[1_1_8rem] text-center"
               :class="{ 'border-2 border-red-500 shadow-[0_0_0_1px_rgba(220,53,69,0.15)]': dniInvalido || errorDniServidor }"
               @input="normalizarDni"
               @blur="borrarDniSeInvalido"
@@ -33,7 +36,7 @@
             <small v-if="dniDuplicado" class="whitespace-nowrap text-xs font-semibold text-red-600">Este DNI ya está registrado</small>
           </div>
         </div>
-        <div class="flex-[4] items-center gap-2 md:flex">
+        <div class="campo min-w-0">
           <label>Nome:</label>
           <input
             v-model="novoPaciente.nomepac"
@@ -42,7 +45,7 @@
             @input="capitalizarNombre"
           />
         </div>
-        <div class="flex-[4] items-center gap-2 md:flex">
+        <div class="campo min-w-0">
           <label>Apelidos:</label>
           <input
             v-model="novoPaciente.apelpac"
@@ -141,7 +144,7 @@
       <div class="flex justify-center gap-3">
         <button
           type="submit"
-          class="rounded-lg border-0 bg-[#009900] px-6 py-2 font-bold text-white transition hover:bg-[#007a00] disabled:cursor-not-allowed disabled:bg-slate-500 disabled:opacity-65"
+          class="rounded-lg border-0 bg-teal-700 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-65"
           :disabled="
             novoPaciente.dnipac === '' ||
             novoPaciente.nomepac === '' ||
@@ -154,14 +157,14 @@
         </button>
         <button
           type="button"
-          class="rounded-lg border border-slate-300 bg-slate-100 px-6 py-2 text-slate-700 transition hover:bg-slate-200"
+          class="rounded-lg border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
           @click="limpiaFormpac"
         >
           Limpar
         </button>
       </div>
     </form>
-    <h4 class="mb-4 bg-[#009900] font-semibold text-white">📋 Listaxe de usuarios</h4>
+    <h2 class="mb-4 flex items-center gap-2 border-b border-slate-200 pb-3 text-lg font-bold text-slate-900">📋 Listaxe de pacientes</h2>
     <table v-if="usuarios.length > 0">
       <thead>
         <tr>

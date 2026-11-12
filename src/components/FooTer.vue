@@ -1,43 +1,10 @@
 <template>
-  <!-- Pie compartido con enlace a la información legal. -->
-  <footer class="footer-content footer">
-    <ul class="link-aviso">
-     <router-link to="/avisolegal" target="_blank" class="aviso_legal">Aviso Legal</router-link>
-    </ul>
-     <p>© {{ new Date().getFullYear() }} XestiónApp — Desenvolvido en Vue 3</p>
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-slate-500 sm:flex-row sm:px-6 lg:px-8">
+      <p>© {{ new Date().getFullYear() }} Sanidade Teis</p>
+      <RouterLink to="/avisolegal" class="font-medium text-teal-700 transition hover:text-teal-900">
+        Aviso Legal
+      </RouterLink>
+    </div>
   </footer>
 </template>
-
-<script setup></script>
-
-<style scoped>
-/* El pie se mantiene visualmente separado del contenido principal. */
-.footer {
-  background: #004800;
-  color: white;
-  text-align: center;
-  padding: 0.2rem 6rem;
-  margin-top: 3rem;
-  font-size: 0.9rem;
-}
-
-.aviso_legal {
-  color: #f9d342;
-  text-decoration: none;
-}
-
-.link-aviso {
-  display: block;
-  margin-top: 6px;
-  color: #f9d342;
-  cursor: pointer;
-}
-
-.footer-content {
-  display: flex;
-  justify-content: center; /* centra horizontalmente */
-  align-items: center;      /* alinea verticalmente na mesma liña */
-  gap: 5rem;                /* espazo entre o texto e o enlace */
-}
-
-</style>

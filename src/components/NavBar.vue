@@ -1,99 +1,54 @@
 <template>
-  <!-- Cabecera común: logo y enlaces que cambian la ruta sin recargar la SPA. -->
-  <nav class="navbar">
-    <div class="logo">
-      <img :src="cruz" alt="" />
-      <span>Sanidad Teis</span>
-    </div>
+  <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8" aria-label="Navegación principal">
+      <RouterLink to="/" class="flex items-center gap-3 text-slate-900 no-underline">
+        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 shadow-sm">
+          <img :src="cruz" alt="" class="h-7 w-7 object-contain" />
+        </span>
+        <span class="hidden text-lg font-bold tracking-tight sm:block">Sanidade Teis</span>
+      </RouterLink>
 
-    <!-- En pantallas pequeñas abre y cierra el menú. -->
-    <button class="hamburger" @click="isOpen = !isOpen">☰</button>
+      <button
+        type="button"
+        class="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 md:hidden"
+        :aria-expanded="isOpen"
+        aria-label="Abrir menú"
+        @click="isOpen = !isOpen"
+      >
+        <span class="text-xl">☰</span>
+      </button>
 
-    <!-- RouterLink comunica cada enlace con router/index.js. -->
-    <ul :class="['menu', { open: isOpen }]">
-      <li><RouterLink to="/">Inicio</RouterLink></li>
-      <li><RouterLink to="/pacientes">Pacientes</RouterLink></li>
-      <li><RouterLink to="/doctores">Doctores</RouterLink></li>
-      <li><RouterLink to="/citas">Citas</RouterLink></li>
-      <li><RouterLink to="/sobrenos">Sobre nós</RouterLink></li>
-    </ul>
-  </nav>
+      <ul
+        :class="[
+          'absolute left-0 right-0 top-full flex-col border-b border-slate-200 bg-white px-4 py-3 shadow-lg md:static md:flex md:flex-row md:items-center md:gap-1 md:border-0 md:p-0 md:shadow-none',
+          isOpen ? 'flex' : 'hidden',
+        ]"
+      >
+        <li v-for="item in links" :key="item.to">
+          <RouterLink
+            :to="item.to"
+            class="block rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-teal-50 hover:text-teal-700"
+            active-class="bg-teal-50 text-teal-700"
+            @click="isOpen = false"
+          >
+            {{ item.label }}
+          </RouterLink>
+        </li>
+      </ul>
+    </nav>
+  </header>
 </template>
 
 <script setup>
-// ref permite que Vue redibuje el menú cuando cambia su estado.
 import { ref } from "vue";
 import cruz from "../assets/img/cruz.png";
+
 const isOpen = ref(false);
+const links = [
+  { to: "/", label: "Inicio" },
+  { to: "/pacientes", label: "Pacientes" },
+  { to: "/doctores", label: "Doctores" },
+  { to: "/citas", label: "Citas" },
+  { to: "/sobrenos", label: "Sobre nós" },
+];
 </script>
-
-<style scoped>
-/* scoped limita estos estilos a este componente. */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.1rem 6rem;
-  background: #004800;
-  color: white;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-.logo img {
-  width: 2rem;
-  height: 2rem;
-  object-fit: contain;
-}
-
-.menu {
-  display: flex;
-  gap: 0.8rem;
-  list-style: none;
-}
-
-.menu a {
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.menu a.router-link-active {
-  border-bottom: 0.2rem solid #ffe66d;
-}
-
-/* NUEVO */
-.hamburger {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-}
-
-/* NUEVO (responsive) */
-@media (max-width: 768px) {
-  .hamburger {
-    display: block;
-  }
-
-  .menu {
-    display: none;
-    position: absolute;
-    top: 50px;
-    right: 0;
-    flex-direction: column;
-    background: #006400#004800;
-  }
-
-  .menu.open {
-    display: flex;
-  }
-}
-</style>

@@ -1,19 +1,22 @@
 <template>
-  <section class="appointment-page">
-    <div class="section-title">
-      <h1>🗓️ Gestión de citas</h1>
-      <span class="section-title__status">Agenda médica</span>
+  <section class="appointment-page w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-teal-50/50 px-5 py-5">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-widest text-teal-700">Gestión clínica</p>
+        <h1 class="mt-1 text-xl font-bold text-slate-900">🗓️ Gestión de citas</h1>
+      </div>
+      <span class="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700">Agenda médica</span>
     </div>
 
-    <div class="appointment-layout">
+    <div class="appointment-layout rounded-xl border border-slate-100 bg-slate-50/60 p-4 sm:p-6">
       <form class="appointment-form" @submit.prevent="guardarCita">
         <div class="form-grid">
-          <label class="form-field">
+          <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
             <span>ID cita</span>
             <input :value="cita._id || 'Se genera al guardar'" type="text" disabled>
           </label>
 
-          <label class="form-field">
+          <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
             <span>Paciente</span>
             <input
               :value="nombrePacienteFormulario"
@@ -23,7 +26,7 @@
             >
           </label>
 
-          <label class="form-field">
+          <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
             <span>Doctor</span>
             <input
               :value="nombreDoctorFormulario"
@@ -33,17 +36,17 @@
             >
           </label>
 
-          <label class="form-field">
+          <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
             <span>Fecha</span>
             <input v-model="cita.fecha" type="date" required>
           </label>
 
-          <label class="form-field">
+          <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
             <span>Hora</span>
             <input v-model="cita.hora" type="time" required>
           </label>
 
-          <label class="form-field">
+          <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
             <span>Estado</span>
             <select v-model="cita.estado" required>
               <option value="pendente">Pendiente</option>
@@ -53,7 +56,7 @@
             </select>
           </label>
 
-          <label class="form-field form-field--wide">
+          <label class="form-field form-field--wide rounded-xl border border-slate-200 bg-white p-3">
             <span>Motivo de la cita</span>
             <input
               v-model.trim="cita.motivo"
@@ -64,7 +67,7 @@
             >
           </label>
 
-          <label class="form-field form-field--wide">
+          <label class="form-field form-field--wide rounded-xl border border-slate-200 bg-white p-3">
             <span>Observaciones</span>
             <textarea
               v-model.trim="cita.observacions"
@@ -83,20 +86,20 @@
         </p>
 
         <div class="form-actions">
-          <button class="button button--primary" type="submit" :disabled="guardando || !formularioValido">
+          <button class="button button--primary !rounded-xl !bg-teal-700 shadow-sm hover:!bg-teal-800" type="submit" :disabled="guardando || !formularioValido">
             {{ guardando ? "Gardando..." : editando ? "Gardar cambios" : "Gardar" }}
           </button>
-          <button class="button button--secondary" type="button" @click="limpiarFormulario">
+          <button class="button button--secondary !rounded-xl !bg-white" type="button" @click="limpiarFormulario">
             {{ editando ? "Cancelar edición" : "Limpar" }}
           </button>
         </div>
       </form>
     </div>
 
-    <div class="section-title section-title--list">
-      <h2>📋 Listado de citas</h2>
+    <div class="mt-8 flex items-center justify-between border-b border-slate-200 pb-3">
+      <h2 class="text-lg font-bold text-slate-900">📋 Listado de citas</h2>
       <button
-        class="refresh-button"
+        class="refresh-button !rounded-lg !border-0 !bg-teal-500 !px-3 !py-2 !text-white hover:!bg-teal-400"
         type="button"
         title="Actualizar listado"
         aria-label="Actualizar listado"
@@ -138,7 +141,7 @@
         </tbody>
       </table>
     </div>
-    <p v-else class="empty-state">No hay citas registradas en la colección citas.</p>
+    <p v-else class="empty-state rounded-xl bg-slate-50">No hay citas registradas en la colección citas.</p>
   </section>
 </template>
 
