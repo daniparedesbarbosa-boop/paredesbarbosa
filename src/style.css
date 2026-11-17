@@ -32,6 +32,29 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid #70d7cf;
+  outline: 3px solid #16a34a;
   outline-offset: 2px;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+.actions-cell button,
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.35rem;
+  padding: 0.3rem;
+  margin: 0 0.125rem;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.actions-cell button:hover,
+.action-button:hover {
+  background: #edf4f1;
 }

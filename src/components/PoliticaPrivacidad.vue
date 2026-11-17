@@ -1,6 +1,6 @@
 <template>
   <article class="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
-    <p class="text-xs font-bold uppercase tracking-widest text-teal-700">Privacidad y confidencialidad</p>
+    <p class="text-xs font-bold uppercase tracking-widest text-green-700">Privacidad y confidencialidad</p>
     <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-900">Política de privacidad</h1>
     <div class="mt-8 space-y-7 leading-7 text-slate-600">
       <section>

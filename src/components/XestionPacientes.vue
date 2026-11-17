@@ -1,14 +1,14 @@
 <template>
-  <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-md:p-4 md:p-8 [&_form]:mb-8 [&_form]:flex [&_form]:w-full [&_form]:flex-col [&_form]:gap-5 [&_.campo]:flex [&_.campo]:min-w-0 [&_.campo]:flex-1 [&_.campo]:flex-col [&_.campo]:items-stretch [&_.campo]:gap-2 [&_.campo>label]:text-sm [&_.campo>label]:font-semibold [&_.dni-wrapper]:flex [&_.dni-wrapper]:w-full [&_.dni-wrapper]:flex-wrap [&_.dni-wrapper]:items-center [&_.dni-wrapper]:gap-2 [&_input]:box-border [&_input]:min-h-11 [&_input]:flex-1 [&_input]:rounded-lg [&_input]:border [&_input]:border-slate-300 [&_input]:bg-white [&_input]:p-3 [&_input]:text-slate-800 [&_input]:outline-none [&_input]:transition [&_input]:focus:border-teal-500 [&_input]:focus:ring-4 [&_input]:focus:ring-teal-500/10 [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-lg [&_select]:border [&_select]:border-slate-300 [&_select]:bg-white [&_select]:p-3 [&_select]:text-slate-800 [&_select]:outline-none [&_select]:focus:border-teal-500 [&_table]:mt-4 [&_table]:w-full [&_table]:border-collapse [&_table]:overflow-hidden [&_table]:border [&_table]:border-slate-200 [&_th]:border-b [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-3 [&_th]:text-left [&_th]:text-xs [&_th]:font-bold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-slate-500 [&_td]:border-b [&_td]:border-slate-100 [&_td]:p-3 [&_td]:text-sm [&_td]:text-slate-600 [&_tbody_tr:hover]:bg-teal-50/40">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-teal-50/50 px-5 py-5">
+  <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-md:p-4 md:p-8 [&_form]:mb-8 [&_form]:flex [&_form]:w-full [&_form]:flex-col [&_form]:gap-5 [&_.campo]:flex [&_.campo]:min-w-0 [&_.campo]:flex-1 [&_.campo]:flex-col [&_.campo]:items-stretch [&_.campo]:gap-2 [&_.campo>label]:text-sm [&_.campo>label]:font-semibold [&_.dni-wrapper]:flex [&_.dni-wrapper]:w-full [&_.dni-wrapper]:flex-wrap [&_.dni-wrapper]:items-center [&_.dni-wrapper]:gap-2 [&_input]:box-border [&_input]:min-h-11 [&_input]:flex-1 [&_input]:rounded-lg [&_input]:border [&_input]:border-slate-300 [&_input]:bg-white [&_input]:p-3 [&_input]:text-slate-800 [&_input]:outline-none [&_input]:transition [&_input]:focus:border-green-500 [&_input]:focus:ring-4 [&_input]:focus:ring-green-500/10 [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-lg [&_select]:border [&_select]:border-slate-300 [&_select]:bg-white [&_select]:p-3 [&_select]:text-slate-800 [&_select]:outline-none [&_select]:focus:border-green-500 [&_table]:mt-4 [&_table]:w-full [&_table]:border-collapse [&_table]:overflow-hidden [&_table]:border [&_table]:border-slate-200 [&_th]:border-b [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-3 [&_th]:text-left [&_th]:text-xs [&_th]:font-bold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-slate-500 [&_td]:border-b [&_td]:border-slate-100 [&_td]:p-3 [&_td]:text-sm [&_td]:text-slate-600 [&_tbody_tr:hover]:bg-green-50/40">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-green-50/50 px-5 py-5">
       <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-teal-700">Gestión clínica</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-green-700">Gestión clínica</p>
         <h1 class="mt-1 text-xl font-bold text-slate-900">👥 Pacientes</h1>
       </div>
         <!-- :disabled impide enviar mientras falten los datos minimos o el consentimiento. -->
       <button
         type="button"
-        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+        class="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
         :disabled="usuarios.length === 0"
         @click="exportarPacientes"
       >
@@ -149,7 +149,7 @@
       <div class="flex justify-center gap-3">
         <button
           type="submit"
-          class="rounded-lg border-0 bg-teal-700 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-65"
+          class="rounded-lg border-0 bg-green-700 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-65"
           :disabled="
             novoPaciente.dnipac === '' ||
             novoPaciente.nomepac === '' ||
@@ -192,10 +192,10 @@
           <td>{{ u.mailpac }}</td>
           <td>{{ u.propac }}</td>
           <td>{{ u.munipac }}</td>
-          <td class="text-center">
-            <button @click="seleccionarPaciente(u)" title="Seleccionar para una cita">📅</button>
-            <button @click="editarUsuario(index)" title="Editar">✏️</button>
-            <button @click="eliminarPaciente(index)" title="Eliminar">🗑️</button>
+          <td class="actions-cell whitespace-nowrap text-center">
+            <button class="action-button" type="button" @click="seleccionarPaciente(u)" title="Seleccionar para una cita">📅</button>
+            <button class="action-button" type="button" @click="editarUsuario(index)" title="Editar">✏️</button>
+            <button class="action-button" type="button" @click="eliminarPaciente(index)" title="Eliminar">🗑️</button>
           </td>
         </tr>
       </tbody>

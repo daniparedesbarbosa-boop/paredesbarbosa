@@ -1,13 +1,13 @@
 <template>
   <section class="appointment-page w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-teal-50/50 px-5 py-5">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-green-50/50 px-5 py-5">
       <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-teal-700">Gestión clínica</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-green-700">Gestión clínica</p>
         <h1 class="mt-1 text-xl font-bold text-slate-900">🗓️ Gestión de citas</h1>
       </div>
       <button
         type="button"
-        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+        class="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
         :disabled="citas.length === 0"
         @click="exportarCitas"
       >
@@ -93,7 +93,7 @@
         </p>
 
         <div class="form-actions">
-          <button class="button button--primary !rounded-xl !bg-teal-700 shadow-sm hover:!bg-teal-800" type="submit" :disabled="guardando || !formularioValido">
+          <button class="button button--primary !rounded-xl !bg-green-700 shadow-sm hover:!bg-green-800" type="submit" :disabled="guardando || !formularioValido">
             {{ guardando ? "Gardando..." : editando ? "Gardar cambios" : "Gardar" }}
           </button>
           <button class="button button--secondary !rounded-xl !bg-white" type="button" @click="limpiarFormulario">
@@ -106,7 +106,7 @@
     <div class="mt-8 flex items-center justify-between border-b border-slate-200 pb-3">
       <h2 class="text-lg font-bold text-slate-900">📋 Listado de citas</h2>
       <button
-        class="refresh-button !rounded-lg !border-0 !bg-teal-500 !px-3 !py-2 !text-white hover:!bg-teal-400"
+        class="refresh-button !rounded-lg !border-0 !bg-green-500 !px-3 !py-2 !text-white hover:!bg-green-400"
         type="button"
         title="Actualizar listado"
         aria-label="Actualizar listado"
@@ -140,7 +140,7 @@
             <td>{{ item.motivo }}</td>
             <td><span class="status-badge" :class="`status-badge--${item.estado}`">{{ etiquetaEstado(item.estado) }}</span></td>
             <td>{{ item.observacions || "—" }}</td>
-            <td class="actions-cell">
+            <td class="actions-cell whitespace-nowrap">
               <button type="button" title="Editar cita" @click="editarCita(item)">✏️</button>
               <button type="button" title="Eliminar cita" @click="eliminarCita(item)">🗑️</button>
             </td>

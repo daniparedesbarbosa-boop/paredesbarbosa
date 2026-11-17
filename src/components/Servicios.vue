@@ -1,7 +1,7 @@
 <template>
   <section class="space-y-8">
     <header class="mx-auto max-w-3xl text-center">
-      <p class="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-teal-700">
+      <p class="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-green-700">
         Atención integral
       </p>
       <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
@@ -19,7 +19,7 @@
       <article
         v-for="servicio in servicios"
         :key="servicio.nombre"
-        class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-teal-200 hover:shadow-lg"
+        class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-green-200 hover:shadow-lg"
       >
         <img
           class="h-52 w-full object-cover transition duration-300 group-hover:scale-105"

@@ -1,8 +1,8 @@
 <template>
   <!-- Estructura común: menú arriba, página elegida en el centro y pie abajo. -->
-  <div id="app" class="min-h-screen bg-slate-50 text-slate-800">
+  <div id="app" class="flex min-h-screen flex-col bg-slate-50 text-slate-800">
     <NavBar />
-    <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+    <main class="mx-auto flex w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
       <router-view />
     </main>
     <FooTer />

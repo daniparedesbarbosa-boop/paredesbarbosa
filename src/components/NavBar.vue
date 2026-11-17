@@ -2,7 +2,7 @@
   <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
     <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8" aria-label="Navegación principal">
       <RouterLink to="/" class="flex items-center gap-3 text-slate-900 no-underline">
-        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 shadow-sm">
+        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600 shadow-sm">
           <img :src="cruz" alt="" class="h-7 w-7 object-contain" />
         </span>
         <span class="hidden text-lg font-bold tracking-tight sm:block">Sanidade Teis</span>
@@ -27,8 +27,8 @@
         <li v-for="item in links" :key="item.to">
           <RouterLink
             :to="item.to"
-            class="block rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-teal-50 hover:text-teal-700"
-            active-class="bg-teal-50 text-teal-700"
+            class="block rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-green-50 hover:text-green-700"
+            active-class="bg-green-50 text-green-700"
             @click="isOpen = false"
           >
             {{ item.label }}
