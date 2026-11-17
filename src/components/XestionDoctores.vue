@@ -11,7 +11,7 @@
         :disabled="doctores.length === 0"
         @click="exportarDoctores"
       >
-        📄 Exportar PDF
+        📄 Imprimir doctores
       </button>
     </div>
     <!-- El submit llama a guardarDoctor(); editando determina si crea o modifica. -->
@@ -72,20 +72,27 @@
         </div>
       </div>
       <div class="flex w-full flex-col gap-2 md:flex-row md:gap-4">
-        <div class="flex flex-1 items-center gap-2">
+        <div class="flex flex-1 flex-wrap items-center gap-3">
           <label class="campo-label">¿Es colegiado?</label>
-          <label>
+          <label class="inline-flex items-center gap-1">
             <input
               v-model="novoDoctor.coledoc"
               type="radio"
               name="colegiado"
               value="si"
               required
+              class="!m-0 !min-h-4 !w-4 !flex-none !p-0"
             />
             Sí
           </label>
-          <label>
-            <input v-model="novoDoctor.coledoc" type="radio" name="colegiado" value="no" />
+          <label class="inline-flex items-center gap-1">
+            <input
+              v-model="novoDoctor.coledoc"
+              type="radio"
+              name="colegiado"
+              value="no"
+              class="!m-0 !min-h-4 !w-4 !flex-none !p-0"
+            />
             No
           </label>
         </div>

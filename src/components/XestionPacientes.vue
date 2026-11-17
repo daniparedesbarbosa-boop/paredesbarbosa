@@ -12,7 +12,7 @@
         :disabled="usuarios.length === 0"
         @click="exportarPacientes"
       >
-        📄 Exportar PDF
+        📄 Imprimir pacientes
       </button>
     </div>
     <form @submit.prevent="modificarPaciente">
@@ -129,8 +129,13 @@
         </div>
       </div>
       <div class="campo campo-condicions">
-        <label>
-          <input v-model="novoPaciente.lopdpac" type="checkbox" required />
+        <label class="flex items-center gap-2">
+          <input
+            v-model="novoPaciente.lopdpac"
+            type="checkbox"
+            required
+            class="!m-0 !min-h-4 !w-4 !flex-none !p-0"
+          />
           Acepto as condicións da
           <a
             :href="$router.resolve({ name: 'politica-privacidad' }).href"

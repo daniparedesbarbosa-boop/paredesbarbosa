@@ -5,7 +5,14 @@
         <p class="text-xs font-bold uppercase tracking-widest text-teal-700">Gestión clínica</p>
         <h1 class="mt-1 text-xl font-bold text-slate-900">🗓️ Gestión de citas</h1>
       </div>
-      <span class="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700">Agenda médica</span>
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+        :disabled="citas.length === 0"
+        @click="exportarCitas"
+      >
+        📄 Imprimir citas
+      </button>
     </div>
 
     <div class="appointment-layout rounded-xl border border-slate-100 bg-slate-50/60 p-4 sm:p-6">
@@ -153,6 +160,7 @@ import { deleteCita, getCitas, saveCita, updateCita } from "../api/citas.js"
 import { getDoctores } from "../api/doctores.js"
 import { getPacientes } from "../api/pacientes.js"
 import { alertaConfirmacion, alertaError, alertaExito } from "../utils/alertas.js"
+import { generarPDF } from "../utils/pdf.js"
 
 const pacienteStore = usePacienteStore()
 const doctorStore = useDoctorStore()
@@ -279,6 +287,22 @@ async function guardarCita() {
 function editarCita(item) {
   Object.assign(cita, citaVacia(), item, { observacions: item.observacions ?? "" })
   editando.value = true
+}
+
+function exportarCitas() {
+  generarPDF(
+    "Listado de citas",
+    ["ID", "Paciente", "Doctor", "Fecha", "Hora", "Motivo"],
+    citas.value.map((cita) => [
+      cita.id,
+      nombrePaciente(cita.pacienteId),
+      nombreDoctor(cita.doctorId),
+      cita.fecha,
+      cita.hora,
+      cita.motivo,
+    ]),
+    "listado_citas.pdf",
+  );
 }
 
 async function eliminarCita(item) {
