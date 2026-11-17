@@ -46,6 +46,7 @@ import cruz from "../assets/img/cruz.png";
 const isOpen = ref(false);
 const links = [
   { to: "/", label: "Inicio" },
+  { to: "/servicios", label: "Servicios" },
   { to: "/pacientes", label: "Pacientes" },
   { to: "/doctores", label: "Doctores" },
   { to: "/citas", label: "Citas" },
