@@ -2,7 +2,7 @@
   <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-md:p-4 md:p-8 [&_form]:mb-8 [&_form]:flex [&_form]:w-full [&_form]:flex-col [&_form]:gap-5 [&_.campo]:flex [&_.campo]:min-w-0 [&_.campo]:flex-1 [&_.campo]:flex-col [&_.campo]:items-stretch [&_.campo]:gap-2 [&_.campo>label]:text-sm [&_.campo>label]:font-semibold [&_.dni-wrapper]:flex [&_.dni-wrapper]:w-full [&_.dni-wrapper]:flex-wrap [&_.dni-wrapper]:items-center [&_.dni-wrapper]:gap-2 [&_input]:box-border [&_input]:min-h-11 [&_input]:flex-1 [&_input]:rounded-lg [&_input]:border [&_input]:border-slate-300 [&_input]:bg-white [&_input]:p-3 [&_input]:text-slate-800 [&_input]:outline-none [&_input]:transition [&_input]:focus:border-green-500 [&_input]:focus:ring-4 [&_input]:focus:ring-green-500/10 [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-lg [&_select]:border [&_select]:border-slate-300 [&_select]:bg-white [&_select]:p-3 [&_select]:text-slate-800 [&_select]:outline-none [&_select]:focus:border-green-500 [&_table]:mt-4 [&_table]:w-full [&_table]:border-collapse [&_table]:overflow-hidden [&_table]:border [&_table]:border-slate-200 [&_th]:border-b [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-3 [&_th]:text-left [&_th]:text-xs [&_th]:font-bold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-slate-500 [&_td]:border-b [&_td]:border-slate-100 [&_td]:p-3 [&_td]:text-sm [&_td]:text-slate-600 [&_tbody_tr:hover]:bg-green-50/40">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-green-50/50 px-5 py-5">
       <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-green-700">Gestión clínica</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-green-700">Xestión clínica</p>
         <h1 class="mt-1 text-xl font-bold text-slate-900">👥 Pacientes</h1>
       </div>
         <!-- :disabled impide enviar mientras falten los datos minimos o el consentimiento. -->
@@ -31,9 +31,9 @@
               @blur="borrarDniSeInvalido"
             />
             <button type="button" title="Buscar paciente" @click="buscarPaciente">🔎</button>
-            <button type="button" title="Limpar formulario" @click="limpiaFormpac">🧹</button>
+            <button type="button" title="Limpar o formulario" @click="limpiaFormpac">🧹</button>
             <small v-if="dniInvalido" class="whitespace-nowrap text-xs font-semibold text-red-600">DNI incorrecto</small>
-            <small v-if="dniDuplicado" class="whitespace-nowrap text-xs font-semibold text-red-600">Este DNI ya está registrado</small>
+            <small v-if="dniDuplicado" class="whitespace-nowrap text-xs font-semibold text-red-600">Este DNI xa está rexistrado</small>
           </div>
         </div>
         <div class="campo min-w-0">
@@ -57,11 +57,11 @@
       </div>
       <div class="flex w-full flex-col gap-2 md:flex-row md:gap-4">
         <div class="campo campo-nacimiento">
-          <label>Fecha de Nacimiento</label>
+          <label>Data de nacemento</label>
           <input v-model="novoPaciente.nacipac" type="date" required />
         </div>
         <div class="campo campo-direccion">
-          <label>Dirección:</label>
+          <label>Enderezo:</label>
           <input v-model="novoPaciente.dirpac" type="text" required />
         </div>
       </div>
@@ -193,7 +193,7 @@
           <td>{{ u.propac }}</td>
           <td>{{ u.munipac }}</td>
           <td class="actions-cell whitespace-nowrap text-center">
-            <button class="action-button" type="button" @click="seleccionarPaciente(u)" title="Seleccionar para una cita">📅</button>
+            <button class="action-button" type="button" @click="seleccionarPaciente(u)"             title="Seleccionar para unha cita">📅</button>
             <button class="action-button" type="button" @click="editarUsuario(index)" title="Editar">✏️</button>
             <button class="action-button" type="button" @click="eliminarPaciente(index)" title="Eliminar">🗑️</button>
           </td>
@@ -201,7 +201,7 @@
       </tbody>
     </table>
 
-    <p v-else>Non hai usuarios cargados.</p>
+    <p v-else>Non hai pacientes cargados.</p>
   </div>
 </template>
 
@@ -241,8 +241,8 @@ const errorDniServidor = ref(false);
 
 function exportarPacientes() {
   generarPDF(
-    "Listado de pacientes",
-    ["DNI", "Apellidos", "Nombre", "Móvil", "Correo", "Provincia", "Municipio"],
+    "Listaxe de pacientes",
+    ["DNI", "Apelidos", "Nome", "Móbil", "Correo", "Provincia", "Municipio"],
     usuarios.value.map((paciente) => [
       paciente.dnipac,
       paciente.apelpac,
@@ -362,7 +362,7 @@ onMounted(async () => {
     ordenarUsuarios();
   } catch (error) {
     console.error("Error al cargar pacientes y provincias:", error);
-    await alertaError("No se pudieron cargar los datos.");
+    await alertaError("Non se puideron cargar os datos.");
   }
 });
 
@@ -389,20 +389,20 @@ async function cargarMunicipios(){
     municipios.value = await obtenerMunicipios(provincia.id);
   } catch (error) {
     console.error("Error al cargar municipios:", error);
-    await alertaError("No se pudieron cargar los municipios.");
+    await alertaError("Non se puideron cargar os municipios.");
   }
 }
 async function modificarPaciente(){
   errorDniServidor.value = false;
   if (dniInvalido.value || dniDuplicado.value || movilInvalido.value || correoInvalido.value) {
-    await alertaError("Revisa los datos introducidos.", "Datos no válidos");
+    await alertaError("Revisa os datos introducidos.", "Datos non válidos");
     return;
   }
 
   const estabaEditando = editando.value;
   // La promesa de confirmacion devuelve isConfirmed; si se cancela, no se escribe nada.
   const confirmacion = await alertaConfirmacion(
-    estabaEditando ? "¿Quieres guardar los cambios de este paciente?" : "¿Quieres guardar este paciente?",
+    estabaEditando ? "Queres gardar os cambios deste paciente?" : "Queres gardar este paciente?",
     estabaEditando ? "Confirmar cambios" : "Confirmar alta",
   );
   if (!confirmacion.isConfirmed) return;
@@ -422,23 +422,24 @@ async function modificarPaciente(){
         usuarios.value[index] = pacienteModificado;
         ordenarUsuarios();
       }
-      await alertaExito("El paciente se actualizó correctamente.");
+      await alertaExito("O paciente actualizouse correctamente.");
     } else{
       const pacienteGuardado = await savePaciente({ ...novoPaciente });
       pacientePersistido = pacienteGuardado;
       usuarios.value.push(pacienteGuardado);
       ordenarUsuarios();
-      await alertaExito("El paciente se guardó correctamente.");
+      await alertaExito("O paciente gardouse correctamente.");
     }
+    limpaFormpac();
+    seleccionarPaciente(pacientePersistido);
     editando.value = false;
     dniOriginal.value = "";
     errorDniServidor.value = false;
-    seleccionarPaciente(pacientePersistido);
   }catch (error) {
     console.error("Error al modificar paciente:", error);
     errorDniServidor.value = error.response?.status === 409;
     await alertaError(
-      errorDniServidor.value ? "Este DNI ya está registrado." : "No se pudo guardar el paciente.",
+      errorDniServidor.value ? "Este DNI xa está rexistrado." : "Non se puido gardar o paciente.",
     );
   }
 }
@@ -450,17 +451,17 @@ async function eliminarPaciente(index) {
     const paciente = usuarios.value[index];
   // La promesa devuelve isConfirmed para decidir si se elimina o se cancela.
     const confirmacion = await alertaConfirmacion(
-      `¿Quieres eliminar a ${paciente.nomepac} ${paciente.apelpac}?`,
+      `Queres eliminar a ${paciente.nomepac} ${paciente.apelpac}?`,
       "Confirmar eliminación",
     );
     if (!confirmacion.isConfirmed) return;
     await deletePaciente(paciente.dnipac);
     usuarios.value.splice(index, 1);
     ordenarUsuarios();
-    await alertaExito("El paciente se eliminó correctamente.");
+    await alertaExito("O paciente eliminouse correctamente.");
   } catch (error) {
     console.error("Error ao eliminar paciente:", error);
-    await alertaError("No se pudo eliminar el paciente.");
+    await alertaError("Non se puido eliminar o paciente.");
   }
 }
 
@@ -483,7 +484,7 @@ async function buscarPaciente() {
   // DNI normalizado para comparar sin depender de mayusculas o espacios.
   const dni = novoPaciente.dnipac.trim().toUpperCase();
   if (!validarDni(dni)) {
-    await alertaError("Introduce un DNI/NIE válido.", "Datos no válidos");
+    await alertaError("Introduce un DNI/NIE válido.", "Datos non válidos");
     dniInput.value?.focus();
     return;
   }
@@ -494,7 +495,7 @@ async function buscarPaciente() {
     );
 
     if (!paciente) {
-      await alertaInfo("No existe ningún paciente con ese DNI.");
+      await alertaInfo("Non existe ningún paciente con ese DNI.");
       return;
     }
 
@@ -510,7 +511,7 @@ async function buscarPaciente() {
     await cargarMunicipios();
   } catch (error) {
     console.error("Error al buscar paciente:", error);
-    await alertaError("No se pudo buscar el paciente.");
+    await alertaError("Non se puido buscar o paciente.");
   }
 }
 

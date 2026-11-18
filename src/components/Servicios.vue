@@ -5,16 +5,16 @@
         Atención integral
       </p>
       <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-        Nuestros servicios
+        Os nosos servizos
       </h1>
       <p class="mt-3 text-base leading-7 text-slate-500">
-        Especialidades y cuidados para acompañarte en cada etapa.
+        Especialidades e coidados para acompañarte en cada etapa.
       </p>
     </header>
 
     <section
       class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      aria-label="Servicios médicos"
+      aria-label="Servizos médicos"
     >
       <article
         v-for="servicio in servicios"
@@ -46,40 +46,40 @@ import traumatologiaImage from '../assets/servicios/traumatologia.jpg'
 
 const servicios = [
   {
-    nombre: 'Cardiología',
-    descripcion: 'Prevención, diagnóstico y tratamiento de las enfermedades del corazón y del sistema circulatorio.',
+    nombre: 'Cardioloxía',
+    descripcion: 'Prevención, diagnóstico e tratamento das enfermidades do corazón e do sistema circulatorio.',
     imagen: cardiologiaImage,
-    alt: 'Atención de cardiología',
+    alt: 'Atención de cardioloxía',
   },
   {
-    nombre: 'Patología',
-    descripcion: 'Análisis clínicos y estudios especializados para conocer el origen de cada enfermedad.',
+    nombre: 'Patoloxía',
+    descripcion: 'Análises clínicos e estudos especializados para coñecer a orixe de cada enfermidade.',
     imagen: patologiaImage,
-    alt: 'Estudio de patología',
+    alt: 'Estudo de patoloxía',
   },
   {
     nombre: 'Pediatría',
-    descripcion: 'Atención médica para acompañar el crecimiento y desarrollo saludable de niños y adolescentes.',
+    descripcion: 'Atención médica para acompañar o crecemento e o desenvolvemento saudable de nenos e adolescentes.',
     imagen: pediatriaImage,
     alt: 'Atención pediátrica',
   },
   {
-    nombre: 'Dermatología',
-    descripcion: 'Cuidado, diagnóstico y tratamiento de la piel, el cabello y las uñas.',
+    nombre: 'Dermatoloxía',
+    descripcion: 'Coidado, diagnóstico e tratamento da pel, do cabelo e das uñas.',
     imagen: dermatologiaImage,
-    alt: 'Consulta de dermatología',
+    alt: 'Consulta de dermatoloxía',
   },
   {
-    nombre: 'Neurología',
-    descripcion: 'Evaluación y tratamiento de las enfermedades del cerebro y del sistema nervioso.',
+    nombre: 'Neuroloxía',
+    descripcion: 'Avaliación e tratamento das enfermidades do cerebro e do sistema nervioso.',
     imagen: neurologiaImage,
-    alt: 'Consulta de neurología',
+    alt: 'Consulta de neuroloxía',
   },
   {
-    nombre: 'Traumatología',
-    descripcion: 'Diagnóstico y recuperación de lesiones de huesos, músculos y articulaciones.',
+    nombre: 'Traumatoloxía',
+    descripcion: 'Diagnóstico e recuperación de lesións de ósos, músculos e articulacións.',
     imagen: traumatologiaImage,
-    alt: 'Consulta de traumatología',
+    alt: 'Consulta de traumatoloxía',
   },
 ]
 </script>

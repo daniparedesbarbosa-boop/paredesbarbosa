@@ -17,14 +17,14 @@
       <div class="flex min-h-[calc(100vh-11.5rem)] max-w-2xl flex-col justify-center px-6 py-12 text-white sm:px-12">
         <p class="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-green-300">Sanidade Teis</p>
         <h1 class="text-4xl font-bold leading-tight tracking-tight sm:text-6xl">
-          Tu salud, más cerca y mejor atendida
+          A túa saúde, máis preto e mellor atendida
         </h1>
         <p class="mt-6 max-w-xl text-lg leading-8 text-slate-200">
-          Gestiona pacientes, doctores y citas desde un único espacio seguro y sencillo.
+          Xestiona pacientes, profesionais e citas desde un único espazo seguro e sinxelo.
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <RouterLink to="/pacientes" class="rounded-xl bg-green-500 px-5 py-3 font-semibold text-white shadow-lg transition hover:bg-green-400">
-            Gestionar pacientes
+            Xestionar pacientes
           </RouterLink>
           <RouterLink to="/citas" class="rounded-xl border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20">
             Ver citas

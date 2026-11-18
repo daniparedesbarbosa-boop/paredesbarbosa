@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
         });
 
         if (pacienteExistente) {
-            return res.status(409).json({ message: "El DNI ya está registrado" });
+            return res.status(409).json({ message: "O DNI xa está rexistrado" });
         }
 
         const paciente = new Paciente({ ...req.body, dnipac: dni });
@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
 
     } catch (error) {
         console.error("Error al crear el paciente:", error);
-        res.status(500).json({ message: "Error al guardar el paciente" });
+        res.status(500).json({ message: "Erro ao gardar o paciente" });
     }
 });
 
@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
 
         res.json(pacientes);
     } catch (error) {
-        res.status(500).json({ message: ("Error al obtener los pacientes", error) });
+        res.status(500).json({ message: "Erro ao obter os pacientes" });
     }
 });
 
@@ -45,12 +45,12 @@ router.get("/:id", async (req, res) => {
             dnipac: String(req.params.id).trim().toUpperCase(),
         });
         if (!paciente) {
-            return res.status(404).json({ message: "Paciente no encontrado" });
+            return res.status(404).json({ message: "Paciente non atopado" });
         }
         res.json(paciente);
     } catch (error) {
         console.error("Error al buscar el paciente:", error);
-        res.status(500).json({ message: "Error al buscar el paciente" });
+        res.status(500).json({ message: "Erro ao buscar o paciente" });
     }
 });
 
@@ -61,12 +61,12 @@ router.delete("/:id", async (req, res) => {
             dnipac: dni
         });
         if (!paciente) {
-            return res.status(404).json({ message: "Paciente no encontrado" });
+            return res.status(404).json({ message: "Paciente non atopado" });
         }
         res.json({ message: "Paciente eliminado" });
 
     } catch (error) {
-        res.status(500).json({ message: ("Error al eliminar el paciente",error) });
+        res.status(500).json({ message: "Erro ao eliminar o paciente" });
     }
 });
 
@@ -81,12 +81,12 @@ router.put("/:id", async (req, res) => {
             dnipac: dniOriginal
         }, datosPaciente, { new: true, runValidators: true });
         if (!paciente) {
-            return res.status(404).json({ message: "Paciente no encontrado" });
+            return res.status(404).json({ message: "Paciente non atopado" });
         }
         res.json(paciente);
 
     } catch (error) {
-        res.status(500).json({ message: ("Error al modificar el paciente",error) });
+        res.status(500).json({ message: "Erro ao modificar o paciente" });
     }
 });
 

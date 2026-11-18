@@ -12,7 +12,7 @@
         type="button"
         class="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 md:hidden"
         :aria-expanded="isOpen"
-        aria-label="Abrir menú"
+        aria-label="Abrir o menú"
         @click="isOpen = !isOpen"
       >
         <span class="text-xl">☰</span>
@@ -46,9 +46,9 @@ import cruz from "../assets/img/cruz.png";
 const isOpen = ref(false);
 const links = [
   { to: "/", label: "Inicio" },
-  { to: "/servicios", label: "Servicios" },
+  { to: "/servicios", label: "Servizos" },
   { to: "/pacientes", label: "Pacientes" },
-  { to: "/doctores", label: "Doctores" },
+  { to: "/doctores", label: "Profesionais" },
   { to: "/citas", label: "Citas" },
   { to: "/sobrenos", label: "Sobre nós" },
 ];

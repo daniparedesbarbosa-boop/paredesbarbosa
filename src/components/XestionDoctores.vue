@@ -2,7 +2,7 @@
   <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-md:p-4 md:p-8 [&_form]:mb-8 [&_form]:flex [&_form]:w-full [&_form]:flex-col [&_form]:gap-5 [&_.campo]:min-w-0 [&_.campo]:flex-1 [&_.campo]:gap-2 [&_input]:box-border [&_input]:min-h-11 [&_input]:flex-1 [&_input]:rounded-lg [&_input]:border [&_input]:border-slate-300 [&_input]:bg-white [&_input]:p-3 [&_input]:outline-none [&_input]:transition [&_input]:focus:border-green-500 [&_input]:focus:ring-4 [&_input]:focus:ring-green-500/10 [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-lg [&_select]:border [&_select]:border-slate-300 [&_select]:bg-white [&_select]:p-3 [&_select]:outline-none [&_select]:focus:border-green-500 [&_table]:mt-4 [&_table]:w-full [&_table]:border-collapse [&_table]:border [&_table]:border-slate-200 [&_th]:border-b [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-3 [&_th]:text-left [&_th]:text-xs [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-slate-500 [&_td]:border-b [&_td]:border-slate-100 [&_td]:p-3 [&_td]:text-sm [&_td]:text-slate-600">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-green-50/50 px-5 py-5">
       <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-green-700">Gestión clínica</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-green-700">Xestión clínica</p>
         <h1 class="mt-1 text-xl font-bold text-slate-900">🩺 Profesionales</h1>
       </div>
       <button
@@ -11,7 +11,7 @@
         :disabled="doctores.length === 0"
         @click="exportarDoctores"
       >
-        📄 Imprimir doctores
+        📄 Imprimir profesionais
       </button>
     </div>
     <!-- El submit llama a guardarDoctor(); editando determina si crea o modifica. -->
@@ -73,7 +73,7 @@
       </div>
       <div class="flex w-full flex-col gap-2 md:flex-row md:gap-4">
         <div class="flex flex-1 flex-wrap items-center gap-3">
-          <label class="campo-label">¿Es colegiado?</label>
+          <label class="campo-label">É colegiado?</label>
           <label class="inline-flex items-center gap-1">
             <input
               v-model="novoDoctor.coledoc"
@@ -83,7 +83,7 @@
               required
               class="!m-0 !min-h-4 !w-4 !flex-none !p-0"
             />
-            Sí
+            Si
           </label>
           <label class="inline-flex items-center gap-1">
             <input
@@ -97,7 +97,7 @@
           </label>
         </div>
         <div class="flex-1 items-center gap-2 md:flex">
-          <label>Especialidad:</label>
+          <label>Especialidade:</label>
           <select v-model="novoDoctor.espedoc" required>
             <option value="" disabled>Selecciona unha especialidad</option>
             <option
@@ -142,7 +142,7 @@
           <th>Nome</th>
           <th>Apelidos</th>
           <th>Movil</th>
-          <th>Especialidad</th>
+          <th>Especialidade</th>
           <th>Accións</th>
         </tr>
       </thead>
@@ -155,7 +155,7 @@
           <td>{{ u.movildoc }}</td>
           <td class="text-center">{{ u.espedoc }}</td>
           <td class="actions-cell whitespace-nowrap text-center">
-            <button class="action-button" type="button" @click="seleccionarDoctor(u)" title="Seleccionar para una cita">📅</button>
+            <button class="action-button" type="button" @click="seleccionarDoctor(u)" title="Seleccionar para unha cita">📅</button>
             <button class="action-button" type="button" @click="editarDoctor(index)" title="Editar">✏️</button>
             <button class="action-button" type="button" @click="eliminarDoctor(index)" title="Eliminar">🗑️</button>
           </td>
@@ -163,7 +163,7 @@
       </tbody>
     </table>
 
-    <p v-else>Non hai usuarios cargados.</p>
+    <p v-else>Non hai profesionais cargados.</p>
   </div>
 </template>
 
@@ -210,8 +210,8 @@ function seleccionarDoctor(doctor) {
 
 function exportarDoctores() {
   generarPDF(
-    "Listado de doctores",
-    ["ID", "Apellidos", "Nombre", "Móvil", "Especialidad"],
+    "Listaxe de profesionais",
+    ["ID", "Apelidos", "Nome", "Móbil", "Especialidade"],
     doctores.value.map((doctor) => [
       doctor._id,
       doctor.apeldoc,
@@ -232,7 +232,7 @@ onMounted(async () => {
     ]);
   } catch (error) {
     console.error("Error al cargar los doctores y especialidades:", error);
-    await alertaError("No se pudieron cargar los datos.");
+    await alertaError("Non se puideron cargar os datos.");
   }
 });
 
@@ -277,14 +277,14 @@ function borrarCorreoSeInvalido() {
 // Valida, confirma y crea o actualiza el doctor segun el modo actual del formulario.
 async function guardarDoctor() {
   if (movilInvalido.value || correoInvalido.value) {
-    await alertaError("Revisa el móvil y el correo electrónico.", "Datos no válidos");
+    await alertaError("Revisa o móbil e o correo electrónico.", "Datos non válidos");
     return;
   }
 
   const estabaEditando = editando.value;
   // La peticion solo se envia despues de que el usuario confirme la operacion.
   const confirmacion = await alertaConfirmacion(
-    estabaEditando ? "¿Quieres guardar los cambios de este doctor?" : "¿Quieres guardar este doctor?",
+    estabaEditando ? "Queres gardar os cambios deste profesional?" : "Queres gardar este profesional?",
     estabaEditando ? "Confirmar cambios" : "Confirmar alta",
   );
   if (!confirmacion.isConfirmed) return;
@@ -304,11 +304,11 @@ async function guardarDoctor() {
 
     limpiaFormdoc();
     await alertaExito(
-      estabaEditando ? "El doctor se actualizó correctamente." : "El doctor se guardó correctamente.",
+      estabaEditando ? "O profesional actualizouse correctamente." : "O profesional gardouse correctamente.",
     );
   } catch (error) {
     console.error("Error al guardar el doctor:", error);
-    await alertaError("No se pudo guardar el doctor.");
+    await alertaError("Non se puido gardar o profesional.");
   }
 }
 
@@ -318,16 +318,16 @@ async function eliminarDoctor(index) {
   try {
   // La respuesta determina si se continua o se cancela la eliminacion.
     const confirmacion = await alertaConfirmacion(
-      `¿Quieres eliminar a ${doctor.nomedoc} ${doctor.apeldoc}?`,
+      `Queres eliminar a ${doctor.nomedoc} ${doctor.apeldoc}?`,
       "Confirmar eliminación",
     );
     if (!confirmacion.isConfirmed) return;
     await deleteDoctor(doctor._id);
     doctores.value.splice(index, 1);
-    await alertaExito("El doctor se eliminó correctamente.");
+    await alertaExito("O profesional eliminouse correctamente.");
   } catch (error) {
     console.error("Error al eliminar el doctor:", error);
-    await alertaError("No se pudo eliminar el doctor.");
+    await alertaError("Non se puido eliminar o profesional.");
   }
 }
 

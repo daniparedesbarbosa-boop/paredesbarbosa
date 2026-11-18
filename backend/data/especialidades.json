@@ -10,51 +10,51 @@
     },
     {
       "id": 3,
-      "nm": "Cardiología"
+      "nm": "Cardioloxía"
     },
     {
       "id": 4,
-      "nm": "Dermatología"
+      "nm": "Dermatoloxía"
     },
     {
       "id": 5,
-      "nm": "Endocrinología y Nutrición"
+      "nm": "Endocrinoloxía e Nutrición"
     },
     {
       "id": 6,
-      "nm": "Gastroenterología"
+      "nm": "Gastroenteroloxía"
     },
     {
       "id": 7,
-      "nm": "Ginecología y Obstetricia"
+      "nm": "Ginecoloxía e Obstetricia"
     },
     {
       "id": 8,
-      "nm": "Hematología"
+      "nm": "Hematoloxía"
     },
     {
       "id": 9,
-      "nm": "Nefrología"
+      "nm": "Nefroloxía"
     },
     {
       "id": 10,
-      "nm": "Neumología"
+      "nm": "Neumoloxía"
     },
     {
       "id": 11,
-      "nm": "Neurología"
+      "nm": "Neuroloxía"
     },
     {
       "id": 12,
-      "nm": "Oftalmología"
+      "nm": "Oftalmoloxía"
     },
     {
       "id": 13,
-      "nm": "Oncología"
+      "nm": "Oncoloxía"
     },
     {
       "id": 14,
-      "nm": "Otorrinolaringología"
+      "nm": "Otorrinolaringoloxía"
     },
     {
       "id": 15,
@@ -66,51 +66,51 @@
     },
     {
       "id": 17,
-      "nm": "Traumatología y Cirugía Ortopédica"
+      "nm": "Traumatoloxía e Cirurxía Ortopédica"
     },
     {
       "id": 18,
-      "nm": "Urología"
+      "nm": "Uroloxía"
     },
     {
       "id": 19,
-      "nm": "Cirugía General"
+      "nm": "Cirurxía Xeral"
     },
     {
       "id": 20,
-      "nm": "Cirugía Cardiovascular"
+      "nm": "Cirurxía Cardiovascular"
     },
     {
       "id": 21,
-      "nm": "Cirugía Plástica"
+      "nm": "Cirurxía Plástica"
     },
     {
       "id": 22,
-      "nm": "Neurocirugía"
+      "nm": "Neurocirurxía"
     },
     {
       "id": 23,
-      "nm": "Reumatología"
+      "nm": "Reumatoloxía"
     },
     {
       "id": 24,
-      "nm": "Alergología"
+      "nm": "Alergoloxía"
     },
     {
       "id": 25,
-      "nm": "Anestesiología y Reanimación"
+      "nm": "Anestesioloxía e Reanimación"
     },
     {
       "id": 26,
-      "nm": "Radiología"
+      "nm": "Radioloxía"
     },
     {
       "id": 27,
-      "nm": "Medicina Física y Rehabilitación"
+      "nm": "Medicina Física e Rehabilitación"
     },
     {
       "id": 28,
-      "nm": "Medicina Preventiva y Salud Pública"
+      "nm": "Medicina Preventiva e Saúde Pública"
     },
     {
       "id": 29,
@@ -118,7 +118,7 @@
     },
     {
       "id": 30,
-      "nm": "Geriatría"
+      "nm": "Xeriatría"
     }
   ]
 }

@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
     } catch (error) {
         console.error("Error al crear el doctor:", error);
         const status = error.name === "ValidationError" ? 400 : 500;
-        res.status(status).json({ message: "Error al guardar el doctor", error: error.message });
+        res.status(status).json({ message: "Erro ao gardar o profesional", error: error.message });
     }
 });
 
@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
 
         res.json(doctores);
     } catch (error) {
-        res.status(500).json({ message: ("Error al obtener los doctores", error) });
+        res.status(500).json({ message: "Erro ao obter os profesionais" });
     }
 });
 
@@ -41,7 +41,7 @@ router.get("/:especialidad", async (req, res) => {
 
         res.json(doctores);
     } catch (error) {
-        res.status(500).json({ message: ("Error al obtener los doctores", error) });
+        res.status(500).json({ message: "Erro ao obter os profesionais" });
     }
 });
 
@@ -50,12 +50,12 @@ router.delete("/:id", async (req, res) => {
     try {
         const doctor = await Doctor.findByIdAndDelete(req.params.id);
         if (!doctor) {
-            return res.status(404).json({ message: "Doctor no encontrado" });
+            return res.status(404).json({ message: "Profesional non atopado" });
         }
-        res.json({ message: "Doctor eliminado" });
+        res.json({ message: "Profesional eliminado" });
 
     } catch (error) {
-        res.status(500).json({ message: ("Error al eliminar el paciente",error) });
+        res.status(500).json({ message: "Erro ao eliminar o profesional" });
     }
 });
 
@@ -69,12 +69,12 @@ router.put("/:id", async (req, res) => {
             { new: true, runValidators: true }
         );
         if (!doctor) {
-            return res.status(404).json({ message: "Doctor no encontrado" });
+            return res.status(404).json({ message: "Profesional non atopado" });
         }
         res.json(doctor);
 
     } catch (error) {
-        res.status(500).json({ message: ("Error al modificar el paciente",error) });
+        res.status(500).json({ message: "Erro ao modificar o profesional" });
     }
 });
 

@@ -2,13 +2,13 @@
   <section class="appointment-page w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-green-50/50 px-5 py-5">
       <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-green-700">Gestión clínica</p>
-        <h1 class="mt-1 text-xl font-bold text-slate-900">🗓️ Gestión de citas</h1>
+        <p class="text-xs font-bold uppercase tracking-widest text-green-700">Xestión clínica</p>
+        <h1 class="mt-1 text-xl font-bold text-slate-900">🗓️ Xestión de citas</h1>
       </div>
       <button
         type="button"
         class="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
-        :disabled="citas.length === 0"
+        :disabled="citasFiltradas.length === 0"
         @click="exportarCitas"
       >
         📄 Imprimir citas
@@ -20,7 +20,7 @@
         <div class="form-grid">
           <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
             <span>ID cita</span>
-            <input :value="cita._id || 'Se genera al guardar'" type="text" disabled>
+            <input :value="cita._id || 'Xérase ao gardar'" type="text" disabled>
           </label>
 
           <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
@@ -34,7 +34,7 @@
           </label>
 
           <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
-            <span>Doctor</span>
+            <span>Profesional</span>
             <input
               :value="nombreDoctorFormulario"
               type="text"
@@ -44,7 +44,7 @@
           </label>
 
           <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
-            <span>Fecha</span>
+            <span>Data</span>
             <input v-model="cita.fecha" type="date" required>
           </label>
 
@@ -56,7 +56,7 @@
           <label class="form-field rounded-xl border border-slate-200 bg-white p-3">
             <span>Estado</span>
             <select v-model="cita.estado" required>
-              <option value="pendente">Pendiente</option>
+              <option value="pendente">Pendente</option>
               <option value="confirmada">Confirmada</option>
               <option value="realizada">Realizada</option>
               <option value="cancelada">Cancelada</option>
@@ -64,18 +64,18 @@
           </label>
 
           <label class="form-field form-field--wide rounded-xl border border-slate-200 bg-white p-3">
-            <span>Motivo de la cita</span>
+            <span>Motivo da cita</span>
             <input
               v-model.trim="cita.motivo"
               type="text"
               maxlength="250"
-              placeholder="Describe brevemente el motivo"
+              placeholder="Describe brevemente o motivo"
               required
             >
           </label>
 
           <label class="form-field form-field--wide rounded-xl border border-slate-200 bg-white p-3">
-            <span>Observaciones</span>
+            <span>Observacións</span>
             <textarea
               v-model.trim="cita.observacions"
               rows="3"
@@ -86,10 +86,10 @@
         </div>
 
         <p v-if="!cita.pacienteId || !cita.doctorId" class="form-hint">
-          Selecciona un paciente y un doctor para guardar una cita.
+          Selecciona un paciente e un profesional para gardar unha cita.
         </p>
         <p v-if="!cargando && !doctores.length" class="form-hint form-hint--warning">
-          Primero debes registrar al menos un doctor.
+          Primeiro debes rexistrar polo menos un profesional.
         </p>
 
         <div class="form-actions">
@@ -97,43 +97,53 @@
             {{ guardando ? "Gardando..." : editando ? "Gardar cambios" : "Gardar" }}
           </button>
           <button class="button button--secondary !rounded-xl !bg-white" type="button" @click="limpiarFormulario">
-            {{ editando ? "Cancelar edición" : "Limpar" }}
+            {{ editando ? "Cancelar a edición" : "Limpar" }}
           </button>
         </div>
       </form>
     </div>
 
     <div class="mt-8 flex items-center justify-between border-b border-slate-200 pb-3">
-      <h2 class="text-lg font-bold text-slate-900">📋 Listado de citas</h2>
-      <button
-        class="refresh-button !rounded-lg !border-0 !bg-green-500 !px-3 !py-2 !text-white hover:!bg-green-400"
-        type="button"
-        title="Actualizar listado"
-        aria-label="Actualizar listado"
-        :disabled="cargando"
-        @click="cargarDatos"
-      >
-        ↻
-      </button>
+      <h2 class="text-lg font-bold text-slate-900">📋 Listaxe de citas</h2>
+      <div class="flex items-center gap-2">
+        <div
+          v-if="pacienteStore.idPaciente"
+          class="inline-flex items-center gap-2 text-sm"
+        >
+          <span class="font-semibold">Filtrado por:</span>
+          <span class="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-900">
+            <span>Paciente: {{ nombrePacienteSeleccionado }}</span>
+            <button
+              type="button"
+              class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-base font-bold leading-none text-green-700 transition hover:bg-green-200 hover:text-green-900"
+              title="Eliminar filtro"
+              aria-label="Eliminar filtro de paciente"
+              @click="limpiarFiltroPaciente"
+            >
+              ×
+            </button>
+          </span>
+        </div>
+      </div>
     </div>
 
     <p v-if="errorCarga" class="form-hint form-hint--warning">{{ errorCarga }}</p>
-    <p v-if="cargando" class="empty-state">Cargando citas...</p>
-    <div v-else-if="citas.length" class="appointments-table-wrapper">
+    <p v-if="cargando" class="empty-state">A cargar citas...</p>
+    <div v-else-if="citasFiltradas.length" class="appointments-table-wrapper">
       <table class="appointments-table">
         <thead>
           <tr>
-            <th>Fecha y hora</th>
+            <th>Data e hora</th>
             <th>Paciente</th>
-            <th>Doctor</th>
+            <th>Profesional</th>
             <th>Motivo</th>
             <th>Estado</th>
-            <th>Observaciones</th>
-            <th>Acciones</th>
+            <th>Observacións</th>
+            <th>Accións</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in citas" :key="item._id">
+          <tr v-for="item in citasFiltradas" :key="item._id">
             <td>{{ item.fecha }} · {{ item.hora }}</td>
             <td>{{ nombrePaciente(item.pacienteId) }}</td>
             <td>{{ nombreDoctor(item.doctorId) }}</td>
@@ -148,7 +158,11 @@
         </tbody>
       </table>
     </div>
-    <p v-else class="empty-state rounded-xl bg-slate-50">No hay citas registradas en la colección citas.</p>
+    <p v-else class="empty-state rounded-xl bg-slate-50">
+      {{ pacienteStore.idPaciente
+        ? "Non hai citas rexistradas para este paciente."
+        : "Non hai citas rexistradas na colección citas." }}
+    </p>
   </section>
 </template>
 
@@ -194,8 +208,20 @@ const formularioValido = computed(() => Boolean(
   cita.estado
 ))
 
+const citasFiltradas = computed(() => {
+  if (!pacienteStore.idPaciente) return citas.value
+  return citas.value.filter(
+    (item) => idRelacionado(item.pacienteId) === String(pacienteStore.idPaciente)
+  )
+})
+
+const nombrePacienteSeleccionado = computed(() => {
+  const nombre = `${pacienteStore.nomepac || ""} ${pacienteStore.apelpac || ""}`.trim()
+  return nombre || "Paciente seleccionado"
+})
+
 const nombrePacienteFormulario = computed(() => {
-  if (!cita.pacienteId) return "Selecciona un paciente desde su pestaña"
+  if (!cita.pacienteId) return "Selecciona un paciente desde a súa lapela"
   const paciente = pacientes.value.find((item) => String(item._id) === idRelacionado(cita.pacienteId))
   return paciente
     ? `${paciente.nomepac} ${paciente.apelpac}`
@@ -203,11 +229,11 @@ const nombrePacienteFormulario = computed(() => {
 })
 
 const nombreDoctorFormulario = computed(() => {
-  if (!cita.doctorId) return "Selecciona un doctor desde su pestaña"
+  if (!cita.doctorId) return "Selecciona un profesional desde a súa lapela"
   const doctor = doctores.value.find((item) => String(item._id) === idRelacionado(cita.doctorId))
   return doctor
     ? `${doctor.nomedoc} ${doctor.apeldoc}`
-    : `${doctorStore.nomedoc || ""} ${doctorStore.apeldoc || ""}`.trim() || "Doctor seleccionado"
+    : `${doctorStore.nomedoc || ""} ${doctorStore.apeldoc || ""}`.trim() || "Profesional seleccionado"
 })
 
 onMounted(async () => {
@@ -248,7 +274,7 @@ async function cargarDatos() {
     pacientes.value = listaPacientes
     doctores.value = listaDoctores
   } catch (error) {
-    errorCarga.value = mensajeError(error, "No se pudieron cargar las citas.")
+    errorCarga.value = mensajeError(error, "Non se puideron cargar as citas.")
     alertaError(errorCarga.value)
   } finally {
     cargando.value = false
@@ -274,11 +300,11 @@ async function guardarCita() {
     } else {
       await saveCita(datosCita)
     }
-    await alertaExito(editando.value ? "La cita se ha actualizado correctamente." : "La cita se ha guardado correctamente.")
+    await alertaExito(editando.value ? "A cita actualizouse correctamente." : "A cita gardouse correctamente.")
     limpiarFormulario()
     await cargarDatos()
   } catch (error) {
-    alertaError(mensajeError(error, "No se pudo guardar la cita."))
+    alertaError(mensajeError(error, "Non se puido gardar a cita."))
   } finally {
     guardando.value = false
   }
@@ -291,9 +317,9 @@ function editarCita(item) {
 
 function exportarCitas() {
   generarPDF(
-    "Listado de citas",
-    ["ID", "Paciente", "Doctor", "Fecha", "Hora", "Motivo"],
-    citas.value.map((cita) => [
+    "Listaxe de citas",
+    ["ID", "Paciente", "Profesional", "Data", "Hora", "Motivo"],
+    citasFiltradas.value.map((cita) => [
       cita.id,
       nombrePaciente(cita.pacienteId),
       nombreDoctor(cita.doctorId),
@@ -305,16 +331,23 @@ function exportarCitas() {
   );
 }
 
+function limpiarFiltroPaciente() {
+  pacienteStore.limpiarPaciente()
+  if (!editando.value) {
+    cita.pacienteId = ""
+  }
+}
+
 async function eliminarCita(item) {
-  const confirmacion = await alertaConfirmacion(`¿Eliminar la cita del ${item.fecha} a las ${item.hora}?`, "Eliminar cita")
+  const confirmacion = await alertaConfirmacion(`Eliminar a cita do ${item.fecha} ás ${item.hora}?`, "Eliminar cita")
   if (!confirmacion.isConfirmed) return
   try {
     await deleteCita(item._id)
     if (cita._id === item._id) limpiarFormulario()
-    await alertaExito("La cita se ha eliminado correctamente.")
+    await alertaExito("A cita eliminouse correctamente.")
     await cargarDatos()
   } catch (error) {
-    alertaError(mensajeError(error, "No se pudo eliminar la cita."))
+    alertaError(mensajeError(error, "Non se puido eliminar a cita."))
   }
 }
 
@@ -329,17 +362,17 @@ function idRelacionado(relacion) {
 
 function nombrePaciente(pacienteId) {
   const paciente = pacientes.value.find((item) => String(item._id) === idRelacionado(pacienteId))
-  return paciente ? `${paciente.nomepac} ${paciente.apelpac}` : "Paciente no disponible"
+  return paciente ? `${paciente.nomepac} ${paciente.apelpac}` : "Paciente non dispoñible"
 }
 
 function nombreDoctor(doctorId) {
   const doctor = doctores.value.find((item) => String(item._id) === idRelacionado(doctorId))
-  return doctor ? `${doctor.nomedoc} ${doctor.apeldoc}` : "Doctor no disponible"
+  return doctor ? `${doctor.nomedoc} ${doctor.apeldoc}` : "Profesional non dispoñible"
 }
 
 function etiquetaEstado(estado) {
   return {
-    pendente: "Pendiente",
+    pendente: "Pendente",
     confirmada: "Confirmada",
     realizada: "Realizada",
     cancelada: "Cancelada"

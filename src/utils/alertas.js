@@ -13,7 +13,7 @@ export const alertaExito = (mensaje, titulo = 'Correcto') => {
 }
 
 // Informa de un fallo y permite mostrar un título personalizado.
-export const alertaError = (mensaje, titulo = 'Error') => {
+export const alertaError = (mensaje, titulo = 'Erro') => {
     return Swal.fire({
         icon: 'error',
         title: titulo,
@@ -33,13 +33,13 @@ export const alertaInfo = (mensaje, titulo = 'Información') => {
 }
 
 // Pregunta antes de una acción destructiva; el resultado indica qué botón eligió el usuario.
-export const alertaConfirmacion = (mensaje, titulo = '¿Estás seguro?') => {
+export const alertaConfirmacion = (mensaje, titulo = 'Estás seguro?') => {
     return Swal.fire({
         icon: 'question',
         title: titulo,
         text: mensaje,
         showCancelButton: true,
-        confirmButtonText: 'Sí, continuar',
+        confirmButtonText: 'Si, continuar',
         cancelButtonText: 'Cancelar',
         reverseButtons: true
     })

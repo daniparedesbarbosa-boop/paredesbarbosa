@@ -32,19 +32,19 @@ function datosPermitidos(body) {
 // Comprueba que las referencias de paciente y doctor apunten a documentos existentes.
 async function validarRelaciones(datos) {
     if (!mongoose.Types.ObjectId.isValid(datos.pacienteId)) {
-        return "El paciente seleccionado no tiene un identificador válido"
+        return "O paciente seleccionado non ten un identificador válido"
     }
 
     if (!mongoose.Types.ObjectId.isValid(datos.doctorId)) {
-        return "El doctor seleccionado no tiene un identificador válido"
+        return "O profesional seleccionado non ten un identificador válido"
     }
 
     if (datos.pacienteId && !(await Paciente.exists({ _id: datos.pacienteId }))) {
-        return "El paciente seleccionado no existe"
+        return "O paciente seleccionado non existe"
     }
 
     if (datos.doctorId && !(await Doctor.exists({ _id: datos.doctorId }))) {
-        return "El doctor seleccionado no existe"
+        return "O profesional seleccionado non existe"
     }
 
     return ""
@@ -58,7 +58,7 @@ router.get("/", async (req, res) => {
         res.json(citas)
     } catch (error) {
         console.error("Error al listar las citas:", error)
-        res.status(500).json({ mensaje: "Error al listar las citas" })
+        res.status(500).json({ mensaje: "Erro ao listar as citas" })
     }
 })
 
@@ -83,7 +83,7 @@ router.post("/", async (req, res) => {
         }
 
         console.error("Error al crear la cita:", error)
-        res.status(500).json({ mensaje: "Error al crear la cita" })
+        res.status(500).json({ mensaje: "Erro ao crear a cita" })
     }
 })
 
@@ -107,7 +107,7 @@ router.put("/:id", async (req, res) => {
         )
 
         if (!cita) {
-            return res.status(404).json({ mensaje: "Cita no encontrada" })
+            return res.status(404).json({ mensaje: "Cita non atopada" })
         }
 
         res.json(cita)
@@ -117,7 +117,7 @@ router.put("/:id", async (req, res) => {
         }
 
         console.error("Error al modificar la cita:", error)
-        res.status(500).json({ mensaje: "Error al modificar la cita" })
+        res.status(500).json({ mensaje: "Erro ao modificar a cita" })
     }
 })
 
@@ -128,17 +128,17 @@ router.delete("/:id", async (req, res) => {
         const cita = await Cita.findByIdAndDelete(req.params.id)
 
         if (!cita) {
-            return res.status(404).json({ mensaje: "Cita no encontrada" })
+            return res.status(404).json({ mensaje: "Cita non atopada" })
         }
 
         res.json({ mensaje: "Cita eliminada" })
     } catch (error) {
         if (error.name === "CastError") {
-            return res.status(400).json({ mensaje: "El ID de la cita no es valido" })
+            return res.status(400).json({ mensaje: "O ID da cita non é válido" })
         }
 
         console.error("Error al eliminar la cita:", error)
-        res.status(500).json({ mensaje: "Error al eliminar la cita" })
+        res.status(500).json({ mensaje: "Erro ao eliminar a cita" })
     }
 })
 

@@ -3,7 +3,7 @@
     <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-slate-500 sm:flex-row sm:px-6 lg:px-8">
       <p>© {{ new Date().getFullYear() }} Sanidade Teis</p>
       <RouterLink to="/avisolegal" class="font-medium text-green-700 transition hover:text-green-900">
-        Aviso Legal
+        Aviso legal
       </RouterLink>
     </div>
   </footer>
