@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 *.env
+
+# Salidas locales del generador de componentes
+tools/generador-componentes/salidas/
