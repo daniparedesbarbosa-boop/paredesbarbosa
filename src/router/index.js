@@ -9,6 +9,7 @@ import PoliticaPrivacidad from "../components/PoliticaPrivacidad.vue";
 import NotFound from "../components/NotFound.vue";
 import Citas from "../components/Citas.vue";
 import Servicios from "../components/Servicios.vue";
+import VistaAcceso from "../components/VistaAcceso.vue";
 
 const routes = [
   // Página inicial y pantallas principales de gestión.
@@ -20,6 +21,7 @@ const routes = [
   { path: "/sobrenos", name: "sobrenos", component: SobreNos },
   { path: "/avisolegal", name: "avisolegal", component: AvisoLegal },
   { path: "/politica-privacidad", name: "politica-privacidad", component: PoliticaPrivacidad },
+  { path: "/vista-acceso", name: "vista-acceso", component: VistaAcceso },
   { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound },
 ];
 

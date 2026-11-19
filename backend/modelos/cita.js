@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 // Define los campos y las reglas de validacion que MongoDB aplica a cada cita.
@@ -29,6 +28,18 @@ const CitaSchema = new mongoose.Schema(
         observacions: {
             type: String,
             default: ""
+        },
+        diagnostico: {
+            type: String,
+            default: ""
+        },
+        tratamento: {
+            type: String,
+            default: ""
+        },
+        tarifa: {
+            type: Number,
+            default: 0
         },
         // Estado inicial utilizado cuando el cliente no indica otro estado.
         estado: {

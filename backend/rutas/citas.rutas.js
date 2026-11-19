@@ -15,6 +15,9 @@ const camposCita = [
     "hora",
     "motivo",
     "observacions",
+    "diagnostico",
+    "tratamento",
+    "tarifa",
     "estado"
 ]
 
