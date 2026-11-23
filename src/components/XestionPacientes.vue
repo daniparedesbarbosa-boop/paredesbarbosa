@@ -78,6 +78,7 @@
             @input="validarMovilEnEntrada"
             @blur="borrarMovilSeInvalido"
           />
+          <small v-if="movilDuplicado" class="whitespace-nowrap text-xs font-semibold text-red-600">Este movil xa está rexistrado</small>
         </div>
         <div class="campo campo-provincia">
           <label>Provincia:</label>
@@ -234,6 +235,7 @@ const municipios = ref([]);
 // Distingue la creacion de un registro de la edicion de uno existente.
 const editando = ref(false);
 const dniOriginal = ref("");
+const movilOriginal = ref("");
 // Referencia al input DNI para devolverle el foco cuando sea necesario corregirlo.
 const dniInput = ref(null);
 // Fuerza la indicacion visual cuando la API rechaza el DNI del formulario.
@@ -274,6 +276,16 @@ const dniDuplicado = computed(() => {
 const movilInvalido = computed(() => {
   const valor = novoPaciente.movilpac.trim();
   return valor !== "" && !/^[67]\d{8}$/.test(valor);
+});
+
+const movilDuplicado = computed(() => {
+  const valor = novoPaciente.movilpac.trim().toUpperCase();
+  return valor !== "" && usuarios.value.some(
+    (usuario) =>
+      String(usuario.movilpac).trim().toUpperCase() === valor &&
+      (!editando.value ||
+        String(usuario.movilpac).trim().toUpperCase() !== movilOriginal.value)
+  );
 });
 
 const correoInvalido = computed(() => {

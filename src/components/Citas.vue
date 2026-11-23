@@ -115,14 +115,37 @@
           </label>
 
           <label
+            class="form-field rounded-xl border border-slate-200 bg-white p-3"
+          >
+            <span>Tarifa</span>
+            <input
+              v-model.number="cita.tarifa"
+              type="float"
+              min="0"
+              step="0.01"
+              required
+            />
+          </label>
+
+          <label
             class="form-field form-field--wide rounded-xl border border-slate-200 bg-white p-3"
           >
-            <span>Tratamiento</span>
+            <span>Diagnóstico</span>
             <textarea
-              v-model.trim="cita.observacions"
+              v-model.trim="cita.diagnostico"
               rows="3"
               maxlength="1000"
-              placeholder="Información adicional (opcional)"
+            ></textarea>
+          </label>
+
+          <label
+            class="form-field form-field--wide rounded-xl border border-slate-200 bg-white p-3"
+          >
+            <span>Tratamento</span>
+            <textarea
+              v-model.trim="cita.tratamento"
+              rows="3"
+              maxlength="1000"
             ></textarea>
           </label>
         </div>
@@ -157,10 +180,10 @@
           <button
             type="button"
             class="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
-            :disabled="citasFiltradas.length === 0"
+            :disabled="citasFiltradas.length === 0 || !formularioValido"
             @click="exportarTicket"
           >
-            📄 Imprimir ticket
+            📄 Imprimir ticket da cita
           </button>
         </div>
       </form>
@@ -169,11 +192,20 @@
     <div
       class="mt-8 flex items-center justify-between border-b border-slate-200 pb-3"
     >
-      <h2 class="text-lg font-bold text-slate-900">📋 Listaxe de citas</h2><br>
-      <input type="checkbox">Listar Todas</input>
+      <h2 class="text-lg font-bold text-slate-900">📋 Listaxe de citas</h2>
       <div class="flex items-center gap-2">
+        <label
+          class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700"
+        >
+          <input
+            v-model="listarTodas"
+            type="checkbox"
+            class="h-4 w-4 accent-green-600"
+          />
+          Listar todas
+        </label>
         <div
-          v-if="idPacienteSeleccionado"
+          v-if="pacienteStore.idPaciente && !listarTodas"
           class="inline-flex items-center gap-2 text-sm"
         >
           <span class="font-semibold">Filtrado por:</span>
@@ -209,6 +241,9 @@
             <th>Motivo</th>
             <th>Estado</th>
             <th>Observacións</th>
+            <th>Diagnóstico</th>
+            <th>Tratamento</th>
+            <th>Prezo</th>
             <th>Accións</th>
           </tr>
         </thead>
@@ -226,6 +261,9 @@
               >
             </td>
             <td>{{ item.observacions || "—" }}</td>
+            <td>{{ item.diagnostico || "—" }}</td>
+            <td>{{ item.tratamento || "—" }}</td>
+            <td>{{ Number(item.tarifa || 0).toFixed(2) }} €</td>
             <td class="actions-cell whitespace-nowrap">
               <button
                 type="button"
@@ -248,7 +286,7 @@
     </div>
     <p v-else class="empty-state rounded-xl bg-slate-50">
       {{
-        idPacienteSeleccionado
+        pacienteStore.idPaciente
           ? "Non hai citas rexistradas para este paciente."
           : "Non hai citas rexistradas na colección citas."
       }}
@@ -285,6 +323,7 @@ const doctores = ref([]);
 const cargando = ref(false);
 const guardando = ref(false);
 const editando = ref(false);
+const listarTodas = ref(false);
 const errorCarga = ref("");
 let actualizacionAutomatica;
 
@@ -296,6 +335,9 @@ const citaVacia = () => ({
   hora: "",
   motivo: "",
   observacions: "",
+  diagnostico: "",
+  tratamento: "",
+  tarifa: 0,
   estado: "pendente",
 });
 const cita = reactive(citaVacia());
@@ -311,14 +353,12 @@ const formularioValido = computed(() =>
   ),
 );
 
-const idPacienteSeleccionado = computed(() =>
-  idRelacionado(pacienteStore.idPaciente),
-);
-
 const citasFiltradas = computed(() => {
-  if (!idPacienteSeleccionado.value) return citas.value;
+  if (listarTodas.value) return citas.value;
+  if (!pacienteStore.idPaciente) return [];
   return citas.value.filter(
-    (item) => idRelacionado(item.pacienteId) === idPacienteSeleccionado.value,
+    (item) =>
+      idRelacionado(item.pacienteId) === String(pacienteStore.idPaciente),
   );
 });
 
@@ -405,6 +445,9 @@ async function guardarCita() {
     hora: cita.hora,
     motivo: cita.motivo.trim(),
     observacions: cita.observacions.trim(),
+    diagnostico: cita.diagnostico.trim(),
+    tratamento: cita.tratamento.trim(),
+    tarifa: Number(cita.tarifa || 0),
     estado: cita.estado,
   };
 
@@ -431,6 +474,9 @@ async function guardarCita() {
 function editarCita(item) {
   Object.assign(cita, citaVacia(), item, {
     observacions: item.observacions ?? "",
+    diagnostico: item.diagnostico ?? "",
+    tratamento: item.tratamento ?? "",
+    tarifa: item.tarifa ?? 0,
   });
   editando.value = true;
 }
@@ -438,14 +484,29 @@ function editarCita(item) {
 function exportarCitas() {
   generarPDF(
     "Listaxe de citas",
-    ["ID", "Paciente", "Profesional", "Data", "Hora", "Motivo"],
+    [
+      "ID",
+      "Paciente",
+      "Profesional",
+      "Data",
+      "Hora",
+      "Motivo",
+      "Diagnóstico",
+      "Tratamento",
+      "Tarifa",
+      "Estado",
+    ],
     citasFiltradas.value.map((cita) => [
       cita.id,
-      nombrePaciente(cita.pacienteId),
+      apellidosPacientePaciente(cita.pacienteId),
       nombreDoctor(cita.doctorId),
       cita.fecha,
       cita.hora,
       cita.motivo,
+      cita.diagnostico || "—",
+      cita.tratamento || "—",
+      `${Number(cita.tarifa || 0).toFixed(2)} €`,
+      etiquetaEstado(cita.estado),
     ]),
     "listado_citas.pdf",
   );
@@ -454,12 +515,19 @@ function exportarCitas() {
 function exportarTicket() {
   generarPDF(
     "Ticket da cita",
-    ["ID", "Paciente", "Profesional", "Especialidad", "Data", "Hora"],
+    [
+      "ID",
+      "Paciente",
+      "Profesional",
+      "Especialidad",
+      "Data",
+      "Hora",
+    ],
     citasFiltradas.value.map((cita) => [
       cita.id,
       nombrePaciente(cita.pacienteId),
       nombreDoctor(cita.doctorId),
-      especialidadDoctor(cita.especialidad),
+      especialidadDoctor(cita.doctorId),
       cita.fecha,
       cita.hora,
     ]),
@@ -508,12 +576,30 @@ function nombrePaciente(pacienteId) {
     : "Paciente non dispoñible";
 }
 
+function apellidosPaciente(pacienteId) {
+  const paciente = pacientes.value.find(
+    (item) => String(item._id) === idRelacionado(pacienteId),
+  );
+  return paciente
+    ? `${paciente.apelpac}`
+    : "Paciente non dispoñible";
+}
+
 function nombreDoctor(doctorId) {
   const doctor = doctores.value.find(
     (item) => String(item._id) === idRelacionado(doctorId),
   );
   return doctor
     ? `${doctor.nomedoc} ${doctor.apeldoc}`
+    : "Profesional non dispoñible";
+}
+
+function especialidadDoctor(doctorId) {
+  const doctor = doctores.value.find(
+    (item) => String(item._id) === idRelacionado(doctorId),
+  );
+  return doctor
+    ? `${doctor.espedoc}`
     : "Profesional non dispoñible";
 }
 

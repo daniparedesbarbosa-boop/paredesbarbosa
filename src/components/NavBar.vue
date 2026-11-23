@@ -51,6 +51,6 @@ const links = [
   { to: "/doctores", label: "Profesionais" },
   { to: "/citas", label: "Citas" },
   { to: "/sobrenos", label: "Sobre nós" },
-  { to: "/acceso", label: "Acceso"}
+  { to: "/vista-acceso", label: "Acceso" },
 ];
 </script>

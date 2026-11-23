@@ -22,6 +22,7 @@ const routes = [
   { path: "/acceso", name: "acceso", component: VistaAcceso},
   { path: "/avisolegal", name: "avisolegal", component: AvisoLegal },
   { path: "/politica-privacidad", name: "politica-privacidad", component: PoliticaPrivacidad },
+  { path: "/vista-acceso", name: "vista-acceso", component: VistaAcceso },
   { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound },
 ];
 
