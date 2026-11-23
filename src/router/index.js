@@ -9,6 +9,7 @@ import PoliticaPrivacidad from "../components/PoliticaPrivacidad.vue";
 import NotFound from "../components/NotFound.vue";
 import Citas from "../components/Citas.vue";
 import Servicios from "../components/Servicios.vue";
+import VistaAcceso from "../components/VistaAcceso.vue";
 
 const routes = [
   // Página inicial y pantallas principales de gestión.
@@ -18,6 +19,7 @@ const routes = [
   { path: "/doctores", alias: "/xestion-doctores", name: "doctores", component: XestionDoctores },
   { path: "/citas", alias: "/xestion-citas", name: "citas", component: Citas },
   { path: "/sobrenos", name: "sobrenos", component: SobreNos },
+  { path: "/acceso", name: "acceso", component: VistaAcceso},
   { path: "/avisolegal", name: "avisolegal", component: AvisoLegal },
   { path: "/politica-privacidad", name: "politica-privacidad", component: PoliticaPrivacidad },
   { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound },

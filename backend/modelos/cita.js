@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 // Define los campos y las reglas de validacion que MongoDB aplica a cada cita.
