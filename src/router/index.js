@@ -10,6 +10,7 @@ import NotFound from "../components/NotFound.vue";
 import Citas from "../components/Citas.vue";
 import Servicios from "../components/Servicios.vue";
 import VistaAcceso from "../components/VistaAcceso.vue";
+import VistaRegistro from "../components/VistaRegistro.vue";
 
 const routes = [
   // Página inicial y pantallas principales de gestión.
@@ -20,6 +21,7 @@ const routes = [
   { path: "/citas", alias: "/xestion-citas", name: "citas", component: Citas },
   { path: "/sobrenos", name: "sobrenos", component: SobreNos },
   { path: "/acceso", name: "acceso", component: VistaAcceso},
+  { path: "/registro", name: "registro", component: VistaRegistro },
   { path: "/avisolegal", name: "avisolegal", component: AvisoLegal },
   { path: "/politica-privacidad", name: "politica-privacidad", component: PoliticaPrivacidad },
   { path: "/vista-acceso", name: "vista-acceso", component: VistaAcceso },

@@ -128,7 +128,7 @@
           </label>
 
           <label
-            class="form-field form-field--wide rounded-xl border border-slate-200 bg-white p-3"
+            class="form-field rounded-xl border border-slate-200 bg-white p-3"
           >
             <span>Diagnóstico</span>
             <textarea
@@ -139,7 +139,7 @@
           </label>
 
           <label
-            class="form-field form-field--wide rounded-xl border border-slate-200 bg-white p-3"
+            class="form-field rounded-xl border border-slate-200 bg-white p-3"
           >
             <span>Tratamento</span>
             <textarea
@@ -180,7 +180,7 @@
           <button
             type="button"
             class="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
-            :disabled="citasFiltradas.length === 0 || !formularioValido"
+            :disabled="!selectedCita"
             @click="exportarTicket"
           >
             📄 Imprimir ticket da cita
@@ -248,7 +248,12 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in citasFiltradas" :key="item._id">
+          <tr
+            v-for="item in citasFiltradas"
+            :key="item._id"
+            :class="{ 'appointment-row--selected': selectedCita?._id === item._id }"
+            @click="seleccionarCita(item)"
+          >
             <td>{{ item.fecha }} · {{ item.hora }}</td>
             <td>{{ nombrePaciente(item.pacienteId) }}</td>
             <td>{{ nombreDoctor(item.doctorId) }}</td>
@@ -313,7 +318,7 @@ import {
   alertaError,
   alertaExito,
 } from "../utils/alertas.js";
-import { generarPDF } from "../utils/pdf.js";
+import { generarPDF, generarTicketPDF } from "../utils/pdf.js";
 
 const pacienteStore = usePacienteStore();
 const doctorStore = useDoctorStore();
@@ -324,6 +329,7 @@ const cargando = ref(false);
 const guardando = ref(false);
 const editando = ref(false);
 const listarTodas = ref(false);
+const selectedCita = ref(null);
 const errorCarga = ref("");
 let actualizacionAutomatica;
 
@@ -425,6 +431,10 @@ async function cargarDatos() {
       getDoctores(),
     ]);
     citas.value = listaCitas;
+    if (selectedCita.value) {
+      selectedCita.value =
+        listaCitas.find((item) => item._id === selectedCita.value._id) || null;
+    }
     pacientes.value = listaPacientes;
     doctores.value = listaDoctores;
   } catch (error) {
@@ -472,6 +482,7 @@ async function guardarCita() {
 }
 
 function editarCita(item) {
+  seleccionarCita(item);
   Object.assign(cita, citaVacia(), item, {
     observacions: item.observacions ?? "",
     diagnostico: item.diagnostico ?? "",
@@ -479,6 +490,10 @@ function editarCita(item) {
     tarifa: item.tarifa ?? 0,
   });
   editando.value = true;
+}
+
+function seleccionarCita(item) {
+  selectedCita.value = item;
 }
 
 function exportarCitas() {
@@ -513,24 +528,24 @@ function exportarCitas() {
 }
 
 function exportarTicket() {
-  generarPDF(
-    "Ticket da cita",
-    [
-      "ID",
-      "Paciente",
-      "Profesional",
-      "Especialidad",
-      "Data",
-      "Hora",
-    ],
-    citasFiltradas.value.map((cita) => [
-      cita.id,
-      nombrePaciente(cita.pacienteId),
-      nombreDoctor(cita.doctorId),
-      especialidadDoctor(cita.doctorId),
-      cita.fecha,
-      cita.hora,
-    ]),
+  if (!selectedCita.value) return;
+
+  const citaSeleccionada = selectedCita.value;
+  generarTicketPDF(
+    {
+      id: citaSeleccionada._id,
+      estado: etiquetaEstado(citaSeleccionada.estado),
+      fecha: citaSeleccionada.fecha,
+      hora: citaSeleccionada.hora,
+      paciente: nombrePaciente(citaSeleccionada.pacienteId),
+      doctor: nombreDoctor(citaSeleccionada.doctorId),
+      especialidad: especialidadDoctor(citaSeleccionada.doctorId),
+      motivo: citaSeleccionada.motivo,
+      diagnostico: citaSeleccionada.diagnostico,
+      tratamento: citaSeleccionada.tratamento,
+      observacions: citaSeleccionada.observacions,
+      tarifa: Number(citaSeleccionada.tarifa || 0),
+    },
     "ticket_cita.pdf",
   );
 }
@@ -551,6 +566,7 @@ async function eliminarCita(item) {
   try {
     await deleteCita(item._id);
     if (cita._id === item._id) limpiarFormulario();
+    if (selectedCita.value?._id === item._id) selectedCita.value = null;
     await alertaExito("A cita eliminouse correctamente.");
     await cargarDatos();
   } catch (error) {
@@ -816,6 +832,16 @@ function mensajeError(error, porDefecto) {
 .appointments-table th {
   background: #eef5ee;
   color: #40514c;
+}
+
+.appointments-table tbody tr {
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.appointments-table tbody tr:hover,
+.appointments-table tbody tr.appointment-row--selected {
+  background: #ecf8ee;
 }
 
 .status-badge {
